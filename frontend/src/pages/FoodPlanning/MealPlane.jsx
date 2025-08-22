@@ -1,5 +1,4 @@
-import MealDaySection from './MealDaySection';
-import MealSuggestions from './MealSuggestions';
+
 import MealSideBarMenu from './MealSideBarMenu';
 import GroceryList from './GroceryList';
 import { Outlet } from 'react-router-dom';

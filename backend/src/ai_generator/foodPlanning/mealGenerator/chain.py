@@ -1,8 +1,8 @@
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
-from .schema import WeeklyMealPlan, MealChangeValidator, OneTimeMeal
-from .prompts import all_meal_generator_prompt, meal_change_validator_prompt, meal_change_generator_prompt
+from .schema import WeeklyMealPlan, MealChangeValidator, OneTimeMeal, HealthAlerts
+from .prompts import all_meal_generator_prompt, meal_change_validator_prompt, meal_change_generator_prompt, health_habit_alerts_prompt
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -29,3 +29,10 @@ meal_change_validator_chain = meal_change_validator_prompt_temp | model | meal_c
 meal_change_parser = PydanticOutputParser(pydantic_object=OneTimeMeal)
 meal_change_prompt_temp = ChatPromptTemplate.from_template(meal_change_generator_prompt)
 meal_change_chain = meal_change_prompt_temp | model | meal_change_parser
+
+
+### Health Alerts
+health_alert_parser = PydanticOutputParser(pydantic_object=HealthAlerts)
+health_alert_prompt = ChatPromptTemplate.from_template(health_habit_alerts_prompt)
+health_alert_chain = health_alert_prompt | model | health_alert_parser
+

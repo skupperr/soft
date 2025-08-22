@@ -5,12 +5,15 @@ import { RiRobot2Fill } from "react-icons/ri";
 import { FaSave } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import { IoBagCheck } from "react-icons/io5";
+import { useAuth } from "@clerk/clerk-react";
 
-const MealSuggestions = ({ mealData, onUpdateMeal }) => {
+const MealChangeAndAlerts = ({ mealData, onUpdateMeal }) => {
 
     const [isLoading, setIsLoading] = useState(false)
     const { makeRequest } = useApi();
     const [text, setText] = useState("");
+    const { userId } = useAuth();
+    const [error, setError] = useState(null);
 
     const placeholders = [
         "E.g., I want something spicy for Monday's breakfast.",
@@ -23,6 +26,39 @@ const MealSuggestions = ({ mealData, onUpdateMeal }) => {
     const [subIndex, setSubIndex] = useState(0); // current char
     const [deleting, setDeleting] = useState(false);
     const [errorDialog, setErrorDialog] = useState(null); // stores error reason
+    const [alerts, setAlerts] = useState([]);
+
+    useEffect(() => {
+        const fetchMeals = async () => {
+            if (!userId) return;
+
+            setIsLoading(true);
+            setError(null);
+
+            try {
+                const res = await makeRequest("get-health-alert");
+
+                if (res.status === "success" && res.data.length > 0) {
+                    const parsedAlert = JSON.parse(res.data[0].alert);
+
+                    setAlerts(parsedAlert.alerts); // setAlerts expects array
+                } else {
+                    console.log("No alerts found");
+                    setError("Failed to load alerts.");
+                }
+            } catch (err) {
+                console.error("Error fetching alerts:", err.message);
+                setError("Network error.");
+            } finally {
+                setIsLoading(false);
+            }
+
+
+        };
+
+        fetchMeals();
+    }, [userId]);
+
 
     useEffect(() => {
         if (index >= placeholders.length) return;
@@ -93,9 +129,49 @@ const MealSuggestions = ({ mealData, onUpdateMeal }) => {
             setIsLoading(false);
         }
     };
-
     // Helper to capitalize meal type
     const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+    const colorMap = {
+        red: {
+            bg: "bg-red-50",
+            border: "border-red-400",
+            title: "text-red-800",
+            text: "text-red-700",
+        },
+        orange: {
+            bg: "bg-orange-50",
+            border: "border-orange-400",
+            title: "text-orange-800",
+            text: "text-orange-700",
+        },
+        yellow: {
+            bg: "bg-yellow-50",
+            border: "border-yellow-400",
+            title: "text-yellow-800",
+            text: "text-yellow-700",
+        },
+        green: {
+            bg: "bg-green-50",
+            border: "border-green-400",
+            title: "text-green-800",
+            text: "text-green-700",
+        },
+    };
+
+
+    const healthAlertGenerator = async () => {
+        try {
+            const res = await makeRequest("health-habit-alert", { method: "POST" });
+            if (res.status === "success") {
+                console.log(res);
+            }
+        } catch (err) {
+            console.error("❌ Error fetching data:", err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
 
     return (
@@ -161,53 +237,34 @@ const MealSuggestions = ({ mealData, onUpdateMeal }) => {
                 </div>
             ))} */}
 
+            <button
+                onClick={healthAlertGenerator}
+                className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#1979e6] text-white text-sm ml-5 mb-5">
+                Temp btn for Alert</button>
+
             <div className="grid grid-rows-3 md:grid-rows-3 gap-6 ml-4">
-                <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
-                    <p className="font-semibold text-green-800 flex items-center">
-                        <IoBagCheck className="w-6 h-6 mr-2" />
-                        Better Deal
-                    </p>
-                    <p className="text-sm text-green-700 mt-2">
-                        Store brand milk costs $1.50 less
-                    </p>
-                    <a
-                        className="text-sm font-semibold text-green-800 mt-2 inline-block"
-                        href="#"
-                    >Switch &amp; Save</a>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
-                    <p className="font-semibold text-blue-800 flex items-center">
-                        <svg className="w-6 h-6 mr-2 text-blue-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                            <path fillRule="evenodd" d="M14 7h-4v3a1 1 0 0 1-2 0V7H6a1 1 0 0 0-.997.923l-.917 11.924A2 2 0 0 0 6.08 22h11.84a2 2 0 0 0 1.994-2.153l-.917-11.924A1 1 0 0 0 18 7h-2v3a1 1 0 1 1-2 0V7Zm-2-3a2 2 0 0 0-2 2v1H8V6a4 4 0 0 1 8 0v1h-2V6a2 2 0 0 0-2-2Z" clipRule="evenodd" />
-                        </svg>
-                        Bulk
-                        Savings
-                    </p>
-                    <p className="text-sm text-blue-700 mt-2">
-                        Buy 3 lbs of bananas, save 15%
-                    </p>
-                    <a
-                        className="text-sm font-semibold text-blue-800 mt-2 inline-block"
-                        href="#"
-                    >Add to Cart</a>
-                </div>
-                <div
-                    className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-400"
-                >
-                    <p className="font-semibold text-purple-800 flex items-center">
-                        <svg className="w-6 h-6 mr-2 text-purple-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                            <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd" />
-                        </svg>
-                        Seasonal
-                    </p>
-                    <p className="text-sm text-purple-700 mt-2">
-                        Apples are 30% cheaper this week
-                    </p>
-                    <a
-                        className="text-sm font-semibold text-purple-800 mt-2 inline-block"
-                        href="#"
-                    >View Options</a>
-                </div>
+
+                {alerts.map((a, idx) => {
+                    const colors = colorMap[a.risk_color] || colorMap.red;
+                    return (
+                        <div
+                            key={idx}
+                            className={`${colors.bg} p-4 rounded-lg border-l-4 ${colors.border}`}
+                        >
+                            <p className={`font-semibold ${colors.title} flex items-center`}>
+                                <IoBagCheck className="w-6 h-6 mr-2" />
+                                {a.title}
+                            </p>
+                            <p className={`text-sm ${colors.text} mt-2`}>{a.issue}</p>
+                            <p
+                                className={`text-sm font-semibold ${colors.title} mt-2 inline-block`}
+                            >
+                                {a.action}
+                            </p>
+                        </div>
+                    );
+                })}
+
             </div>
 
 
@@ -233,4 +290,4 @@ const MealSuggestions = ({ mealData, onUpdateMeal }) => {
     );
 }
 
-export default MealSuggestions;
+export default MealChangeAndAlerts;

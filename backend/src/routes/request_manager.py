@@ -145,3 +145,45 @@ async def change_meal_plan(
         import traceback
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+
+
+@router.post("/health-habit-alert")
+async def health_habit_alert(
+    request: Request = None, db_dep=Depends(get_db)
+):
+    try:
+        cursor, conn = db_dep
+        user_details = authenticate_and_get_user_details(request)
+        user_id = user_details.get("user_id")
+
+        await db.delete_all_health_alert(cursor, conn, user_id)
+
+        user_records = await db.get_user_food_planning_info(cursor, user_id)
+
+        result = ai_meal_generator.health_habit_alert(user_records)
+
+        result = result.dict()
+
+        await db.insert_health_alert(cursor, conn, user_id, result)
+
+        return {"status": "success"}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+    
+
+@router.get("/get-health-alert")
+async def get_health_alert(request: Request = None, db_dep=Depends(get_db)):
+
+    try:
+        cursor, conn = db_dep
+        user_details = authenticate_and_get_user_details(request)
+        user_id = user_details.get("user_id")
+
+        health_alerts = await db.get_health_alert(cursor, user_id)
+
+        return {"status": "success", "data": health_alerts}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch history: {str(e)}")

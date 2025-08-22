@@ -40,3 +40,15 @@ def change_meal_plan(user_records, available_groceries_of_user, query):
     })
 
     return result
+
+def health_habit_alert(user_records):
+
+    pre = InfoPreProcessing()
+    user_info_json = pre.format_user_records_for_llm_json(user_records)
+
+    result = health_alert_chain.invoke({
+        "user_info": user_info_json,
+        "format_instructions": health_alert_parser.get_format_instructions()
+    })
+
+    return result

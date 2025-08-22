@@ -33,3 +33,13 @@ class OneTimeMeal(BaseModel):
     ingredients_used: List[Ingredient] 
     nutrition: Dict[str, str] 
     recipe: List[str] 
+
+class Alert(BaseModel):
+    title: str
+    issue: str
+    action: str
+    risk_color: Literal["red", "orange", "yellow", "green"]
+
+
+class HealthAlerts(BaseModel):
+    alerts: List[Alert]

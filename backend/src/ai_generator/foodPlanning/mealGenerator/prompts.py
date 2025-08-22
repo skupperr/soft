@@ -164,3 +164,44 @@ JSON Schema:
   ]
 }}
 """
+
+
+health_habit_alerts_prompt = """
+You are a health & habit analysis AI.
+Your task: From the user's information, produce up to THREE (3) high-impact habit alerts that would most improve their health.
+
+Process:
+1) Parse the JSON under "User Information".
+2) Evaluate habits using these practical rules (do not diagnose):
+   - Sleep: For age 18, <7 hours/night is insufficient; target 7–9. >10 may be excessive.
+   - Hydration: <2.0 L/day is low; 2.0–3.0 L/day is generally reasonable barring contraindications. Also consider users age, height and weight before making the decision.
+   - Activity: "Sedentary" indicates low activity; recommend at least 150 min/week moderate activity or daily walking targets. Also consider users age, height and weight before making the decision.
+   - BMI: BMI = weight_kg / (height_m^2). Underweight <18.5; healthy 18.5–24.9; overweight 25–29.9; obese ≥30. Tailor advice accordingly (e.g., nutrient-dense calories and protein if underweight).
+   - Caffeine: >3 servings/day is high; 1–2 is moderate; avoid intake within 8 hours of bedtime if sleep is suboptimal. Also consider users age, height and weight before making the decision.
+   - Meals/snacks: If underweight or highly active, consider increasing meal/snack frequency and protein intake.
+3) Select at most THREE issues with the greatest potential benefit. If no issues, return an empty list.
+4) For each alert, produce:
+   - "title": ≤30 characters, specific and benefit-oriented.
+   - "issue": One short sentence describing what the user is doing now AND why it’s harmful.
+   - "action": One short sentence with concrete, measurable steps (include numbers/timings, e.g., “Increase water to 2.5 L/day; carry a 750 mL bottle and finish 1 by noon.”).
+   - "risk_color": One of "red" (high), "orange" (moderate), "yellow" (mild), "green" (positive reinforcement/keep it up). Prefer red/orange/yellow for problems; use green only for a clear strength worth reinforcing. Try to give them different colors from each other
+5) Tone: clear, supportive, culturally neutral. Avoid medical jargon and diagnosis language.
+6) Output strictly the JSON below with no extra text or commentary.
+
+User Information:
+{user_info}
+
+{format_instructions}
+JSON Schema:
+{{
+  "alerts": [
+    {{
+      "title": "string",
+      "issue": "string",
+      "action": "string",
+      "risk_color": "red|orange|yellow|green"
+    }}
+  ]
+}}
+
+"""

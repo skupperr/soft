@@ -1,5 +1,5 @@
 import MealDaySection from './MealDaySection';
-import MealSuggestions from './MealSuggestions';
+import MealChangeAndAlerts from './MealChangeAndAlerts';
 import { useState, useEffect } from 'react';
 import { useApi } from "../../utils/api";
 import { useAuth } from "@clerk/clerk-react";
@@ -183,7 +183,7 @@ function MealPlanMain() {
                     )}
                 </div>
 
-                <MealSuggestions mealData={mealData} onUpdateMeal={updateMeal} />
+                <MealChangeAndAlerts mealData={mealData} onUpdateMeal={updateMeal} />
 
             </div>
         </div>
