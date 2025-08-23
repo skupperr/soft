@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { RiRobot2Fill } from "react-icons/ri";
 import { FaSave } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
@@ -12,6 +12,49 @@ function ProductSearch() {
     const [mode, setMode] = useState("manual")
     const [query, setQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false)
+    const [text, setText] = useState("");
+
+    const [displayText, setDisplayText] = useState("");
+    const [index, setIndex] = useState(0); // current phrase
+    const [subIndex, setSubIndex] = useState(0); // current char
+    const [deleting, setDeleting] = useState(false);
+    const [errorDialog, setErrorDialog] = useState(null); // stores error reason
+    const [alerts, setAlerts] = useState([]);
+
+    const placeholders = [
+        "What do I need for chicken tacos?",
+        "Show me items for homemade margherita pizza",
+        "I want to bake chocolate chip cookies",
+        "What do I need for a high-protein vegetarian meal?"
+    ];
+
+    useEffect(() => {
+            if (index >= placeholders.length) return;
+    
+            if (
+                !deleting &&
+                subIndex === placeholders[index].length + 1 // finished typing
+            ) {
+                setTimeout(() => setDeleting(true), 1500); // pause before deleting
+                return;
+            }
+    
+            if (deleting && subIndex === 0) {
+                setDeleting(false);
+                setIndex((prev) => (prev + 1) % placeholders.length); // move to next phrase
+                return;
+            }
+    
+            const timeout = setTimeout(() => {
+                setSubIndex((prev) => prev + (deleting ? -1 : 1));
+            }, deleting ? 40 : 70); // speed: delete faster than typing
+    
+            return () => clearTimeout(timeout);
+        }, [subIndex, deleting, index, placeholders]);
+    
+        useEffect(() => {
+            setDisplayText(placeholders[index].substring(0, subIndex));
+        }, [subIndex, index]);
 
     const handleSearch = async () => {
         setIsLoading(true);
@@ -28,15 +71,45 @@ function ProductSearch() {
                 console.error("Error searching product:", error);
             } finally {
                 setIsLoading(false);
+                setQuery("");
             }
         }
     };
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && query.trim() !== "") {
+            e.preventDefault();  
             handleSearch();
         }
     }
+
+    const handleGenerate = async () => {
+        if (!text.trim()) return;
+
+        try {
+            setIsLoading(true);
+
+            const res = await makeRequest("generate-grocery-product", {
+                method: "POST",
+                body: JSON.stringify(text),
+            });
+
+            if (res.status === "error") {
+                setErrorDialog(res.reason); // show dialog
+            } else if (res.status === "success" && res.data) {
+
+                console.log(res);
+            }
+
+        } catch (err) {
+            console.error("❌ Error sending request:", err);
+            setErrorDialog("Network error. Please try again.");
+        } finally {
+            setText("");
+            setIsLoading(false);
+        }
+    };
+
     return (
         <main className="container mx-auto px-4 sm:px-6 ">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -69,12 +142,13 @@ function ProductSearch() {
                                     <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
                                 </svg>
                                 <input
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                     placeholder="Search for products..."
                                     type="text"
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
                                     onKeyDown={handleKeyDown}
+                                    disabled={isLoading}
                                 />
                             </div>)}
                         {mode === "ai" && (
@@ -86,11 +160,16 @@ function ProductSearch() {
                                             AI Shopping Assistant
                                         </p>
                                         <textarea
-                                            class="w-full h-20 p-2 border bg-white border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder=""
+                                        value={text}
+                                        onChange={(e) => setText(e.target.value)}
+                                        placeholder={displayText}
+                                        disabled={isLoading}
+                                            class="w-full h-20 p-2 border bg-white border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                         ></textarea>
                                         <button
-                                            class="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
+                                            disabled={isLoading}
+                                            onClick={handleGenerate}
+                                            class="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             Get Suggestions
                                         </button>

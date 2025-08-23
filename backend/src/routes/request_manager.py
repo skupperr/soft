@@ -7,6 +7,7 @@ from ..database.database import get_db
 from ..database import db
 from ..ai_generator.foodPlanning.product_retriever.scrapper_root import fetch_all
 from ..ai_generator.foodPlanning.mealGenerator import ai_meal_generator
+import time
 
 router = APIRouter()
 
@@ -24,6 +25,7 @@ async def storing_food_planning_survey(
     request_obj: Request = None,
     db_dep=Depends(get_db)
 ):
+
     try:
         cursor, conn = db_dep
         user_details = authenticate_and_get_user_details(request_obj)
@@ -33,7 +35,7 @@ async def storing_food_planning_survey(
         survey_data = {ans.question.lower().replace(" ", "_"): ans.answer for ans in input}
 
         record = await db.store_users_foodPlanning_info(cursor, conn, user_id, survey_data)
-        return {"status": "success", "id": record["id"]}
+        return {"status": "success"}
 
     except Exception as e:
         print("Error in storing information to database:", str(e))
@@ -187,3 +189,40 @@ async def get_health_alert(request: Request = None, db_dep=Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch history: {str(e)}")
+    
+
+@router.post("/generate-grocery-product")
+async def generate_grocery_product(
+    query: str = Body(..., embed=False),
+    request: Request = None,
+    db_dep=Depends(get_db)
+):
+    try:
+        cursor, conn = db_dep
+        user_details = authenticate_and_get_user_details(request)
+        user_id = user_details.get("user_id")
+
+        validation_result = ai_meal_generator.change_meal_plan_query_validator(query)
+
+        validation_dict = validation_result.dict()   # pydantic to Dict
+
+        status = validation_dict["status"]
+        reason = validation_dict["reason"]
+
+        if status == "valid":
+            user_records = await db.get_user_food_planning_info(cursor, user_id)
+            available_groceries_of_user = await db.get_groceries_by_user(cursor, user_id)
+
+            new_meal = ai_meal_generator.change_meal_plan(user_records, available_groceries_of_user, query)
+            new_meal = new_meal.dict()
+
+            await db.change_meal(cursor, conn, user_id, new_meal)
+
+            return {"status": "success", "message": "Meal change request is valid.", "data": new_meal}
+        else:
+            return {"status": "error", "message": "Meal change request is invalid.", "reason": reason}
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")

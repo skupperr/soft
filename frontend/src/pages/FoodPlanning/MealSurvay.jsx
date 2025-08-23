@@ -4,6 +4,11 @@ import { BsInfoCircle } from "react-icons/bs";
 import { BsFillInfoCircleFill } from "react-icons/bs";
 import { IoIosClose } from "react-icons/io";
 import { useApi } from "../../utils/api";
+import { grid } from 'ldrs';
+
+// Register the web component
+grid.register();
+
 
 
 function MealSurvey() {
@@ -288,21 +293,39 @@ function MealSurvey() {
 
             <div className="max-w-md mx-auto mt-12 rounded-lg shadow-sm border border-gray-200">
                 {/* Progress */}
-                <div className="mb-6 p-4 pb-0">
-                    <div className="flex justify-between items-center mb-1">
-                        <p className="text-sm font-medium text-gray-500">
-                            Question {current + 1} / {total}
-                        </p>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                            className="bg-green-600 h-2 rounded-full transition-all duration-500"
-                            style={{ width: `${((current + 1) / total) * 100}%` }}
-                        ></div>
-                    </div>
-                </div>
+                {
+                    !isLoading && (
+                        <div className="mb-6 p-4 pb-0">
+                            <div className="flex justify-between items-center mb-1">
+                                <p className="text-sm font-medium text-gray-500">
+                                    Question {current + 1} / {total}
+                                </p>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                    className="bg-green-600 h-2 rounded-full transition-all duration-500"
+                                    style={{ width: `${((current + 1) / total) * 100}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    )
+                }
+                {
+                    isLoading && (
+                        <div className="mb-6 p-4 pb-0">
+                            <div className="flex justify-between items-center mb-1">
+                                <p className="text-sm font-medium">
+                                </p>
+                            </div>
+                            <div className="w-full rounded-full h-2">
+                            </div>
+                        </div>
+                    )
+                }
 
                 <div className="relative overflow-hidden">
+
+                    {/* Survey Questions */}
                     {surveyQuestions.map((q, index) => {
                         let position = "absolute top-0 w-full transition-transform duration-500";
                         if (index === current) position += " translate-x-0 relative";
@@ -351,7 +374,7 @@ function MealSurvey() {
                                         />
                                     )}
 
-                                    {/* Input-only questions (e.g., height) */}
+                                    {/* Input-only questions */}
                                     {q.allowInput && (!q.options || q.options.length === 0) && (
                                         <input
                                             type="text"
@@ -360,7 +383,6 @@ function MealSurvey() {
                                             onChange={(e) =>
                                                 setAnswers((prev) => {
                                                     const next = [...prev];
-                                                    // For input-only, keep value and custom in sync
                                                     next[index] = {
                                                         value: e.target.value,
                                                         custom: e.target.value,
@@ -375,14 +397,22 @@ function MealSurvey() {
                             </div>
                         );
                     })}
+
+                    {/* Loader overlay */}
+                    {isLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
+                            <l-grid size="60" speed="1.5" color="black"></l-grid>
+                        </div>
+                    )}
+
                 </div>
 
                 {/* Navigation */}
                 <div className="mt-8 flex justify-between p-5 pt-0">
                     <button
                         onClick={handlePrev}
-                        disabled={current === 0}
-                        className="flex items-center text-gray-600 hover:text-gray-900 font-medium text-sm py-2 px-4 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isLoading || current === 0}
+                        className="flex items-center cursor-pointer text-gray-600 hover:text-gray-900 font-medium text-sm py-2 px-4 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         ← Previous
                     </button>
@@ -391,14 +421,15 @@ function MealSurvey() {
                         <button
                             onClick={handleNext}
                             disabled={!canProceed}
-                            className="flex items-center text-white bg-green-600 hover:bg-green-700 font-medium text-sm py-2 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center cursor-pointer text-white bg-green-600 hover:bg-green-700 font-medium text-sm py-2 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Next →
                         </button>
                     ) : (
                         <button
-                            onClick={submitSurvey} disabled={!canProceed}
-                            className="flex items-center text-white bg-blue-600 hover:bg-blue-700 font-medium text-sm py-2 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={submitSurvey}
+                            disabled={isLoading}
+                            className="flex items-center cursor-pointer text-white bg-blue-600 hover:bg-blue-700 font-medium text-sm py-2 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Finish
                         </button>
