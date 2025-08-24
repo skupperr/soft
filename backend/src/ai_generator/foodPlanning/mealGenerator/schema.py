@@ -43,3 +43,10 @@ class Alert(BaseModel):
 
 class HealthAlerts(BaseModel):
     alerts: List[Alert]
+
+class GroceryProductValidator(BaseModel):
+    status: Literal["valid", "invalid"]
+    reason: str
+
+class GroceryList(BaseModel):
+    items: List[str]

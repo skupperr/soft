@@ -1,11 +1,12 @@
 import React from 'react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { RiRobot2Fill } from "react-icons/ri";
 import { FaSave } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import { IoBagCheck } from "react-icons/io5";
 import { useApi } from "../../utils/api";
-
+import { grid } from 'ldrs';
+grid.register();
 
 function ProductSearch() {
     const { makeRequest } = useApi();
@@ -20,43 +21,110 @@ function ProductSearch() {
     const [deleting, setDeleting] = useState(false);
     const [errorDialog, setErrorDialog] = useState(null); // stores error reason
     const [alerts, setAlerts] = useState([]);
+    const [data, setData] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState("All Categories");
+    const [selectedShop, setSelectedShop] = useState("All Shops");
+    const [sortOption, setSortOption] = useState("Default");
+    const [shoppingList, setShoppingList] = useState([]);
 
-    const placeholders = [
+
+    const isFirstLoad = useRef(true);
+
+    useEffect(() => {
+        const storedList = localStorage.getItem("shoppingList");
+        if (storedList) {
+            setShoppingList(JSON.parse(storedList));
+        }
+    }, []);
+
+    useEffect(() => {
+        if (isFirstLoad.current) {
+            isFirstLoad.current = false;
+            return;
+        }
+        localStorage.setItem("shoppingList", JSON.stringify(shoppingList));
+    }, [shoppingList]);
+    // Add item
+    const addItem = (item) => {
+        // prevent duplicates
+        if (!shoppingList.find((i) => i.name === item.name)) {
+            setShoppingList((prev) => [...prev, item]);
+        }
+    };
+    // Remove item
+    const removeItem = (name) => {
+        setShoppingList((prev) => prev.filter((i) => i.name !== name));
+    };
+
+
+
+    // Flatten all items into one list with category info
+    const allItems = Object.entries(data).flatMap(([category, items]) =>
+        items.map((item) => ({ ...item, category }))
+    );
+
+    // Extract unique shops dynamically
+    const shops = ["All Shops", ...new Set(allItems.map((item) => item.shop))];
+
+    // Apply both filters
+    let filteredItems = allItems.filter((item) => {
+        const categoryMatch =
+            selectedCategory === "All Categories" || item.category === selectedCategory;
+        const shopMatch =
+            selectedShop === "All Shops" || item.shop === selectedShop;
+        return categoryMatch && shopMatch;
+    });
+
+    if (sortOption === "Low to High") {
+        filteredItems = [...filteredItems].sort(
+            (a, b) => (a.discounted_price || a.original_price) - (b.discounted_price || b.original_price)
+        );
+    } else if (sortOption === "High to Low") {
+        filteredItems = [...filteredItems].sort(
+            (a, b) => (b.discounted_price || b.original_price) - (a.discounted_price || a.original_price)
+        );
+    }
+
+
+    const placeholders = React.useMemo(() => [
         "What do I need for chicken tacos?",
         "Show me items for homemade margherita pizza",
         "I want to bake chocolate chip cookies",
         "What do I need for a high-protein vegetarian meal?"
-    ];
+    ], []);
 
     useEffect(() => {
-            if (index >= placeholders.length) return;
-    
-            if (
-                !deleting &&
-                subIndex === placeholders[index].length + 1 // finished typing
-            ) {
-                setTimeout(() => setDeleting(true), 1500); // pause before deleting
-                return;
-            }
-    
-            if (deleting && subIndex === 0) {
-                setDeleting(false);
-                setIndex((prev) => (prev + 1) % placeholders.length); // move to next phrase
-                return;
-            }
-    
-            const timeout = setTimeout(() => {
-                setSubIndex((prev) => prev + (deleting ? -1 : 1));
-            }, deleting ? 40 : 70); // speed: delete faster than typing
-    
-            return () => clearTimeout(timeout);
-        }, [subIndex, deleting, index, placeholders]);
-    
-        useEffect(() => {
-            setDisplayText(placeholders[index].substring(0, subIndex));
-        }, [subIndex, index]);
+        if (index >= placeholders.length) return;
+
+        if (
+            !deleting &&
+            subIndex === placeholders[index].length + 1 // finished typing
+        ) {
+            setTimeout(() => setDeleting(true), 1500); // pause before deleting
+            return;
+        }
+
+        if (deleting && subIndex === 0) {
+            setDeleting(false);
+            setIndex((prev) => (prev + 1) % placeholders.length); // move to next phrase
+            return;
+        }
+
+        const timeout = setTimeout(() => {
+            setSubIndex((prev) => prev + (deleting ? -1 : 1));
+        }, deleting ? 40 : 70); // speed: delete faster than typing
+
+        return () => clearTimeout(timeout);
+    }, [subIndex, deleting, index, placeholders]);
+
+    useEffect(() => {
+        setDisplayText(placeholders[index].substring(0, subIndex));
+    }, [subIndex, index]);
+
+
 
     const handleSearch = async () => {
+        setData([])
         setIsLoading(true);
 
         if (query.trim() !== "") {
@@ -66,7 +134,9 @@ function ProductSearch() {
                     body: JSON.stringify(query),
                 });
 
-                console.log("Backend response:", data);
+                console.log("Backend response:", data.results);
+                setData(data.results)
+
             } catch (error) {
                 console.error("Error searching product:", error);
             } finally {
@@ -75,18 +145,20 @@ function ProductSearch() {
             }
         }
     };
-
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && query.trim() !== "") {
-            e.preventDefault();  
+            e.preventDefault();
             handleSearch();
         }
     }
+
+
 
     const handleGenerate = async () => {
         if (!text.trim()) return;
 
         try {
+            setData([])
             setIsLoading(true);
 
             const res = await makeRequest("generate-grocery-product", {
@@ -96,9 +168,9 @@ function ProductSearch() {
 
             if (res.status === "error") {
                 setErrorDialog(res.reason); // show dialog
-            } else if (res.status === "success" && res.data) {
+            } else if (res.status === "success" && res.results) {
 
-                console.log(res);
+                setData(res.results)
             }
 
         } catch (err) {
@@ -109,6 +181,8 @@ function ProductSearch() {
             setIsLoading(false);
         }
     };
+
+
 
     return (
         <main className="container mx-auto px-4 sm:px-6 ">
@@ -121,14 +195,14 @@ function ProductSearch() {
                             </h2>
                             <div className="items-c mb-4 inline-flex">
                                 <button
-                                    className={`flex items-center justify-center px-4 py-2 ${mode === "manual" ? "bg-blue-100 text-blue-600" : " bg-gray-100 text-gray-500"} rounded-l-md font-medium`} onClick={() => setMode("manual")}>
+                                    className={`cursor-pointer flex items-center justify-center px-4 py-2 ${mode === "manual" ? "bg-blue-100 text-blue-600" : " bg-gray-100 text-gray-500"} rounded-l-md font-medium`} onClick={() => setMode("manual")}>
                                     <svg className="w-6 h-6 text-blue-800 mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                         <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
                                     </svg>
                                     Manual
                                 </button>
                                 <button
-                                    className={`flex items-center justify-center px-4 py-2 ${mode === "ai" ? "bg-blue-100 text-blue-600" : " bg-gray-100 text-gray-500"} rounded-r-md font-medium`} onClick={() => setMode("ai")}>
+                                    className={`cursor-pointer flex items-center justify-center px-4 py-2 ${mode === "ai" ? "bg-blue-100 text-blue-600" : " bg-gray-100 text-gray-500"} rounded-r-md font-medium`} onClick={() => setMode("ai")}>
                                     <RiRobot2Fill className="mr-2 text-xl" />
 
                                     AI
@@ -160,16 +234,16 @@ function ProductSearch() {
                                             AI Shopping Assistant
                                         </p>
                                         <textarea
-                                        value={text}
-                                        onChange={(e) => setText(e.target.value)}
-                                        placeholder={displayText}
-                                        disabled={isLoading}
+                                            value={text}
+                                            onChange={(e) => setText(e.target.value)}
+                                            placeholder={displayText}
+                                            disabled={isLoading}
                                             class="w-full h-20 p-2 border bg-white border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                         ></textarea>
                                         <button
                                             disabled={isLoading}
                                             onClick={handleGenerate}
-                                            class="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            class="mt-4 px-4 py-2 cursor-pointer bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             Get Suggestions
                                         </button>
@@ -179,123 +253,170 @@ function ProductSearch() {
                         )}
 
                         <div className="flex space-x-4 mb-6">
-                            <select
-                                className="border border-gray-300 rounded-md px-4 py-2 w-full"
-                            >
-                                <option>All Categories</option>
-                            </select>
-                            <select
-                                className="border border-gray-300 rounded-md px-4 py-2 w-full"
-                            >
-                                <option>Price Range</option>
-                            </select>
-                            <select
-                                className="border border-gray-300 rounded-md px-4 py-2 w-full"
-                            >
-                                <option>Brand</option>
-                            </select>
+
+                            {/* Category Filter */}
+                            <div className="relative w-full mb-4">
+                                <select
+                                    className="border border-gray-300 rounded-md pl-4 pr-10 py-2 w-full appearance-none bg-white focus:outline-none"
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                >
+                                    <option>All Categories</option>
+                                    {Object.keys(data).map((category) => (
+                                        <option key={category} value={category}>
+                                            {category}
+                                        </option>
+                                    ))}
+                                </select>
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                                    ▼
+                                </span>
+                            </div>
+
+                            {/* Shop Filter */}
+                            <div className="relative w-full mb-4">
+                                <select
+                                    className="border border-gray-300 rounded-md pl-4 pr-10 py-2 w-full appearance-none bg-white focus:outline-none"
+                                    value={selectedShop}
+                                    onChange={(e) => setSelectedShop(e.target.value)}
+                                >
+                                    {shops.map((shop, idx) => (
+                                        <option key={idx} value={shop}>
+                                            {shop}
+                                        </option>
+                                    ))}
+                                </select>
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                                    ▼
+                                </span>
+                            </div>
+
+                            {/* Sort By */}
+                            <div className="relative w-full mb-4">
+                                <select
+                                    className="border border-gray-300 rounded-md pl-4 pr-10 py-2 w-full appearance-none bg-white focus:outline-none"
+                                    value={sortOption}
+                                    onChange={(e) => setSortOption(e.target.value)}
+                                >
+                                    <option value="Default">Sort By</option>
+                                    <option value="Low to High">Low to High</option>
+                                    <option value="High to Low">High to Low</option>
+                                </select>
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                                    ▼
+                                </span>
+                            </div>
+
+
+
                         </div>
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">
                             Search Results
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div
-                                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                            >
-                                <div className="flex items-center">
-                                    <img
-                                        alt="Organic Bananas"
-                                        className="w-16 h-16 rounded-md"
-                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZ9zKH0t-pGkS6Wj0SLoOWzL2RStx7L6UwCpUIdbqh6nmJoIea-YY7B5gPXioTRpZ1iR5QOGhtAln3TSO6-Cly-cnoEv9jYXwpyw4LDvNBSufP5C-VuWQA3dV_GK9Ys3cR1910Z9iXaIviQdUE0tsbpu03OpIvItJ2lyDjj2EytKa-49DZLmU6jHB9qpyMUblvaQHoWoaCs_OLnGNtvAt9rWRr7hJq_l285LP5Xd_rpJSmcbGHh_5tMf0xKtfG58bIb6e3Okg-vlp8"
-                                    />
-                                    <div className="ml-4">
-                                        <p className="font-medium text-gray-800">Organic Bananas</p>
-                                        <p className="text-sm text-gray-500">Fresh, per lb</p>
-                                        <p className="font-semibold text-green-600">$2.49</p>
-                                    </div>
-                                </div>
-                                <button
-                                    className="bg-green-100 text-green-600 p-2 rounded-full hover:bg-green-200"
-                                >
-                                    <svg className="w-6 h-6 text-green-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m-7 7V5" />
-                                    </svg>
 
-                                </button>
-                            </div>
-                            <div
-                                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                            >
-                                <div className="flex items-center">
-                                    <img
-                                        alt="Whole Milk"
-                                        className="w-16 h-16 rounded-md"
-                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEKJwXpDxp1m_aJInoXoS6LeaTzPJx90_oDt3pkkJ4L46db-z17PWtUxymbp3wnccfTgw67W6IPxsGGwtuIfJbOx10KkYX3E7gPP765LVDfY4ukOEpivP7oxi1RrJANH57lGaPFRoV5PQi6keud2i3kAch8UuvDfmPuzUEU6eH1n2z3WxNXNigKxZzUMg2pZBlDuS-FqzBnB_hadcFHBltdIW9UR6xqa7v1j5d7Co4BTnazryYK-YFvPCR32rVY1XirBcchSCv0pUh"
-                                    />
-                                    <div className="ml-4">
-                                        <p className="font-medium text-gray-800">Whole Milk</p>
-                                        <p className="text-sm text-gray-500">1 Gallon</p>
-                                        <p className="font-semibold text-green-600">$3.99</p>
-                                    </div>
-                                </div>
-                                <button
-                                    className="bg-green-100 text-green-600 p-2 rounded-full hover:bg-green-200"
-                                >
-                                    <svg className="w-6 h-6 text-green-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m-7 7V5" />
-                                    </svg>
 
-                                </button>
-                            </div>
-                            <div
-                                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                            >
-                                <div className="flex items-center">
-                                    <img
-                                        alt="Chicken Breast"
-                                        className="w-16 h-16 rounded-md"
-                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCneL1JGq83aWbF-KKHAn3DaGCDpEOZZ-ATq7PDVo5CdsIc5-dfvqAnjmJVH85bL_jXMQ3D5az8oSAkbtcL2D0fKLW0KVz2JhbuttjHuQIWKEmO0hBoc53xtVmGMvZ-a6IBJ8mKNjAdKGmECtTR0-lZiSL4EbOFE7NQZjicl9DJb01PFlkoCylu_i15evutkw6MX1XsXxtr5b5MDdunDN-Zf0vmZURwjR52ByXYqNh4wkm6pKPuiRpnwnGkY7ymDyofiJFm-MOUZkcI"
-                                    />
-                                    <div className="ml-4">
-                                        <p className="font-medium text-gray-800">Chicken Breast</p>
-                                        <p className="text-sm text-gray-500">Boneless, per lb</p>
-                                        <p className="font-semibold text-green-600">$6.99</p>
-                                    </div>
-                                </div>
-                                <button
-                                    className="bg-green-100 text-green-600 p-2 rounded-full hover:bg-green-200"
-                                >
-                                    <svg className="w-6 h-6 text-green-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m-7 7V5" />
-                                    </svg>
+                        {/* Items Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative">
+                            {/* Overlay wrapper */}
 
-                                </button>
-                            </div>
-                            <div
-                                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                            >
-                                <div className="flex items-center">
-                                    <img
-                                        alt="Bread Loaf"
-                                        className="w-16 h-16 rounded-md"
-                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCp4IVwop8vDx6r4eCbNqrUklgQWx2JRdFvHUN0EJVDWom98yZAsKQ6X6trPsXXhG6PxsoX2TayZudXXEAyowLPbbCxVfn7vbvLoKD_JIdbm706m3xBHzBB36-rzzs2KYM4tgfadfKbeEMcEbtRlBOUCbKVJGspM2bwV1heREAdIM5_Sqevhedx8uaNiuNvmCtKWoFyQIYW36akz-Ob3mXzy6YyghIrJGsL1ZLtr61oq4WxXmteP6EerWi2T0mHoEap2Po4LFLt3Tm"
-                                    />
-                                    <div className="ml-4">
-                                        <p className="font-medium text-gray-800">Bread Loaf</p>
-                                        <p className="text-sm text-gray-500">Whole Wheat</p>
-                                        <p className="font-semibold text-green-600">$2.99</p>
-                                    </div>
+                            {isLoading && (
+                                <div className="m-30 col-span-full inset-0 flex items-center justify-center bg-white bg-opacity-70 z-10">
+                                    <l-grid size="60" speed="1.5" color="black"></l-grid>
                                 </div>
-                                <button
-                                    className="bg-green-100 text-green-600 p-2 rounded-full hover:bg-green-200"
-                                >
-                                    <svg className="w-6 h-6 text-green-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m-7 7V5" />
-                                    </svg>
+                            )}
 
-                                </button>
-                            </div>
+                            {/* Empty state */}
+                            {!isLoading && filteredItems.length === 0 && (
+                                <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
+                                    <svg
+                                        className="w-12 h-12 text-gray-400 mb-4"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M9 13h6m-3-3v6m-9 5h18a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                    <h3 className="text-lg font-semibold text-gray-700">No items found</h3>
+                                    <p className="text-gray-500 mt-1">Try searching with another keyword or pick a different category.</p>
+                                </div>
+                            )}
+
+                            {/* Items go here */}
+                            {filteredItems.map((item, idx) => (
+                                <div
+                                    key={item.category + idx}
+                                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                                >
+                                    <div className="flex items-center">
+                                        <img
+                                            alt={item.name}
+                                            className="w-16 h-16 rounded-md"
+                                            src={item.image_link}
+                                        />
+                                        <div className="ml-4">
+                                            <a
+                                                href={item.link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="font-medium text-gray-800 hover:underline"
+                                            >
+                                                {item.name}
+                                            </a>
+
+                                            {/* Price */}
+                                            {item.discounted_price ? (
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-semibold text-green-600">
+                                                        ৳{item.discounted_price}
+                                                    </p>
+                                                    <p className="text-sm text-gray-500 line-through">
+                                                        ৳{item.original_price}
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <p className="font-semibold text-green-600">
+                                                    ৳{item.original_price}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* + button */}
+                                    <button
+                                        className="bg-green-100 text-green-600 p-2 rounded-full hover:bg-green-200"
+                                        onClick={() => addItem(item)}
+                                    >
+                                        <svg
+                                            className="w-6 h-6 text-green-800"
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="24"
+                                            height="24"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke="currentColor"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M5 12h14m-7 7V5"
+                                            />
+                                        </svg>
+                                    </button>
+                                </div>
+                            ))}
+
                         </div>
+
+
+
                     </div>
                 </div>
                 <div className="lg:col-span-1">
@@ -304,12 +425,8 @@ function ProductSearch() {
                             <h2 className="text-xl font-semibold text-gray-900">
                                 Shopping List
                             </h2>
-                            <span
-                                className="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full"
-                            >3 items</span>
                         </div>
-                        <p className="text-gray-600 font-medium mb-4">Weekly Groceries</p>
-                        <div className="space-y-3">
+                        {/* <div className="space-y-3">
                             <div className="flex justify-between items-center">
                                 <div>
                                     <p className="font-medium text-gray-800">Organic Bananas</p>
@@ -322,29 +439,59 @@ function ProductSearch() {
 
                                 </button>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p className="font-medium text-gray-800">Whole Milk</p>
-                                    <p className="text-sm text-gray-500">$3.99</p>
+                        </div> */}
+
+                        <div className="space-y-3">
+
+                            {shoppingList.length === 0 && (
+                                <p className="text-sm text-gray-500">No items added yet.</p>
+                            )}
+
+                            {shoppingList.map((item, idx) => (
+                                <div
+                                    key={idx}
+                                    className="flex justify-between items-center p-3 border rounded-lg bg-gray-50"
+                                >
+                                    <div>
+                                        <a
+                                            href={item.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="font-medium text-gray-800 hover:underline"
+                                        >
+                                            {item.name}
+                                        </a>
+                                        <p className="text-sm text-gray-500">
+                                            ৳{item.discounted_price || item.original_price}
+                                        </p>
+                                    </div>
+                                    <button
+                                        className="text-red-500 hover:text-red-700"
+                                        onClick={() => removeItem(item.name)}
+                                    >
+                                        <svg
+                                            className="w-6 h-6 text-red-800"
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="24"
+                                            height="24"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke="currentColor"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                            />
+                                        </svg>
+                                    </button>
                                 </div>
-                                <button className="text-red-500 hover:text-red-700">
-                                    <svg className="w-6 h-6 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p className="font-medium text-gray-800">Chicken Breast</p>
-                                    <p className="text-sm text-gray-500">$6.99</p>
-                                </div>
-                                <button className="text-red-500 hover:text-red-700">
-                                    <svg className="w-6 h-6 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                    </svg>
-                                </button>
-                            </div>
+                            ))}
                         </div>
+
+
                         <div className="border-t border-gray-200 my-4"></div>
                         <div className="flex justify-between items-center mb-4">
                             <p className="text-gray-600 font-medium">Total:</p>
@@ -508,7 +655,27 @@ function ProductSearch() {
                     </div>
                 </div>
             </div> */}
-        </main>
+
+            {/* Error Dialog */}
+            {
+                errorDialog && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 transition-opacity duration-300">
+                        <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 transform transition-transform duration-300 scale-100">
+                            <h2 className="text-lg font-bold mb-4 text-red-600">Error</h2>
+                            <p className="mb-6 text-gray-700">{errorDialog}</p>
+                            <div className="flex justify-end">
+                                <button
+                                    onClick={() => setErrorDialog(null)}
+                                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </main >
     )
 }
 

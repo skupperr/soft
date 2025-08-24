@@ -33,6 +33,8 @@ class Chaldal:
                 # Product name
                 name = product.select_one(".name").get_text(strip=True) if product.select_one(".name") else None
 
+                weight = product.select_one(".subText").get_text(strip=True) if product.select_one(".subText") else None
+
                 # Discounted price
                 discounted_price = (
                     product.select_one(".discountedPrice span:nth-of-type(2)").get_text(strip=True)
@@ -51,13 +53,23 @@ class Chaldal:
                 # Image link
                 img_tag = product.select_one("img")
                 img_link = img_tag["src"] if img_tag else None
+                shop = "Chaldal"
+
+                if original_price:
+                    original_price = original_price.replace(",", "").replace(" ", "")
+                    original_price = original_price.split('.')[0]
+
+                if discounted_price:
+                    discounted_price = discounted_price.replace(",", "").replace(" ", "")
+                    discounted_price = discounted_price.split('.')[0]
 
                 products.append({
-                    "name": name,
+                    "name": name + " - " + weight if weight else None,
                     "discounted_price": discounted_price,
                     "original_price": original_price,
                     "link": "https://chaldal.com"+link if link else None,
-                    "image_link": img_link
+                    "image_link": img_link,
+                    "shop": "Chaldal"
                 })
 
             products = products[:20]

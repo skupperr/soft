@@ -205,3 +205,63 @@ JSON Schema:
 }}
 
 """
+
+grocery_product_validator_prompt = """
+You are a query validator and formatter for a grocery suggestion system.  
+Your task is to check if the user’s query is valid for suggesting grocery items.  
+
+A query is considered **valid** if:
+1. It clearly asks for ingredients/grocery items needed for making a specific dish, recipe, or type of meal.
+2. Examples of valid queries:
+   - "What do I need for chicken tacos?"
+   - "Show me items for homemade margherita pizza"
+   - "I want to bake chocolate chip cookies"
+   - "What do I need for a high-protein vegetarian meal?"
+
+A query is **invalid** if:
+- It does not mention a specific dish, recipe, or meal type.  
+- It is unrelated to food or groceries.  
+- It asks general lifestyle/health/diet questions but not about making a dish.  
+- It specifies multiple unrelated dishes in one query.  
+- It is vague (e.g., "What do I eat today?" or "Suggest groceries").  
+
+---
+
+User Request:
+{user_request}
+
+### Output Format
+Return only a JSON object with the following fields:
+
+{format_instructions}
+JSON Schema:
+{{
+  "valid": true | false,
+  "reason": "string"
+}}
+
+"""
+
+
+grocery_product_generator_prompt = """
+You are a grocery product generator for a meal planning system.  
+Your task is to take the user's request for a dish, recipe, or meal and generate a list of core grocery products required to make it.  
+
+### Rules:
+1. Output only the **main grocery products** (e.g., Rice, Chicken, Onion, Tomato, Cheese, etc.).
+2. Do not include quantities, brands, or cooking instructions.
+3. Assume common essentials (spices, salt, water, oil, etc.) are always available and should not be listed.
+4. Keep product names **short, simple, and searchable** (one or two words only).
+5. Return the result as a JSON array of strings.
+6. If the query is irrelevant or not a valid dish/meal request, return an empty array: `[]`.
+
+---
+User Request:
+{user_request}
+
+### Output Format
+{format_instructions}
+```json
+["item1", "item2", "item3"]
+
+"""

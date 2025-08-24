@@ -77,12 +77,26 @@ class MeenaBazar:
                     if spans:
                         discount_price = spans[-1].get_text(strip=True)
 
+                if original_price:
+                    original_price = original_price.replace("TK", "").replace(" ", "")
+                    original_price = original_price.split('.')[0]
+
+                if discount_price:
+                    discount_price = discount_price.replace("TK", "").replace(" ", "")
+                    discount_price = discount_price.split('.')[0]
+
+                    
+                if not original_price:
+                    original_price = discount_price
+                    discount_price = None
+
                 results.append({
                     "name": name,
                     "discounted_price": discount_price,
                     "original_price": original_price,
                     "link": "https://meenabazaronline.com"+link if link else None,
-                    "image_link": img_link
+                    "image_link": img_link,
+                    "shop": "Meena Bazar"
                 })
 
             await browser.close()

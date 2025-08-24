@@ -42,15 +42,21 @@ class Unimart:
                 price_tag = product.select_one(".product-price")
                 price = price_tag.get_text(strip=True) if price_tag else None
 
-                # Image link
+                if price:
+                    price = price.replace("TK", "").replace(" ", "")
+
+                # Image link (check data-src first)
                 img_tag = product.select_one("img")
-                img_link = img_tag["src"] if img_tag else None
+                img_link = None
+                if img_tag:
+                    img_link = img_tag.get("data-src") or img_tag.get("src")
 
                 results.append({
                     "name": name,
                     "original_price": price,
                     "link": link,
-                    "image_link": img_link
+                    "image_link": img_link,
+                    "shop": "Unimart"
                 })
 
             await browser.close()

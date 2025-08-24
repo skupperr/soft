@@ -7,7 +7,8 @@ from ..database.database import get_db
 from ..database import db
 from ..ai_generator.foodPlanning.product_retriever.scrapper_root import fetch_all
 from ..ai_generator.foodPlanning.mealGenerator import ai_meal_generator
-import time
+from ..ai_generator.foodPlanning.mealGenerator.schema import GroceryList
+import time, json
 
 router = APIRouter()
 
@@ -50,14 +51,59 @@ async def grocery_search(query: str = Body(..., embed=False), request: Request =
 
         products = [y.strip() for y in query.split(',') if y.strip()]
 
-        all_results = []
+        all_results = {key: None for key in products}
+
         for product in products:
             res = await fetch_all(product)
-            all_results.extend(res)
+            all_results[product] = res
 
         return {"status": "success", "results": all_results}
 
     except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+
+@router.post("/generate-grocery-product")
+async def generate_grocery_product(
+    query: str = Body(..., embed=False),
+    request: Request = None,
+):
+    try:
+
+        user_details = authenticate_and_get_user_details(request)
+        user_id = user_details.get("user_id")
+
+        validation_result = ai_meal_generator.grocery_product_validation(query)
+
+        validation_dict = validation_result.dict()   # pydantic to Dict
+
+        status = validation_dict["status"]
+        reason = validation_dict["reason"]
+
+        if status == "valid":
+
+            result = ai_meal_generator.grocery_product_generation(query)
+            
+            # Suppose your LLM output was parsed into Pydantic
+            grocery_list: GroceryList = result  # result is already a GroceryList object
+
+            # Get Python list
+            products = grocery_list.items
+            
+            all_results = {key: None for key in products}
+
+            for product in products:
+                res = await fetch_all(product)
+                all_results[product] = res
+
+            return {"status": "success", "results": all_results}
+
+        else:
+            return {"status": "error", "message": "Meal change request is invalid.", "reason": reason}
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 
@@ -189,40 +235,5 @@ async def get_health_alert(request: Request = None, db_dep=Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch history: {str(e)}")
-    
 
-@router.post("/generate-grocery-product")
-async def generate_grocery_product(
-    query: str = Body(..., embed=False),
-    request: Request = None,
-    db_dep=Depends(get_db)
-):
-    try:
-        cursor, conn = db_dep
-        user_details = authenticate_and_get_user_details(request)
-        user_id = user_details.get("user_id")
 
-        validation_result = ai_meal_generator.change_meal_plan_query_validator(query)
-
-        validation_dict = validation_result.dict()   # pydantic to Dict
-
-        status = validation_dict["status"]
-        reason = validation_dict["reason"]
-
-        if status == "valid":
-            user_records = await db.get_user_food_planning_info(cursor, user_id)
-            available_groceries_of_user = await db.get_groceries_by_user(cursor, user_id)
-
-            new_meal = ai_meal_generator.change_meal_plan(user_records, available_groceries_of_user, query)
-            new_meal = new_meal.dict()
-
-            await db.change_meal(cursor, conn, user_id, new_meal)
-
-            return {"status": "success", "message": "Meal change request is valid.", "data": new_meal}
-        else:
-            return {"status": "error", "message": "Meal change request is invalid.", "reason": reason}
-
-    except Exception as e:
-        import traceback
-        print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
