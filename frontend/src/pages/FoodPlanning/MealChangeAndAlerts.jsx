@@ -186,6 +186,7 @@ const MealChangeAndAlerts = ({ mealData, onUpdateMeal }) => {
             <div className="flex flex-wrap items-end gap-4 px-4 py-3">
                 <label className="flex flex-col min-w-40 flex-1">
                     <textarea
+                        disabled={isLoading}
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         placeholder={displayText}

@@ -11,11 +11,8 @@ load_dotenv()
 model = ChatGoogleGenerativeAI(model="gemini-2.0-flash-001")
 
 
-# Parser
 parser = PydanticOutputParser(pydantic_object=WeeklyMealPlan)
-# Prompt
 prompt_template = ChatPromptTemplate.from_template(all_meal_generator_prompt)
-# Chain
 meal_plan_chain = prompt_template | model | parser
 
 

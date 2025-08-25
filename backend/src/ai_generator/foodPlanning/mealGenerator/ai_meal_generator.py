@@ -2,12 +2,12 @@ from .chain import *
 from .info_pre_processing_for_llm import InfoPreProcessing
 
 
-def all_meal_generator(user_records, available_groceries_of_user):
+async def all_meal_generator(user_records, available_groceries_of_user):
     pre = InfoPreProcessing()
     user_info_json = pre.format_user_records_for_llm_json(user_records)
     groceries_json = pre.format_groceries_for_llm_json(available_groceries_of_user)
 
-    result = meal_plan_chain.invoke(
+    result = await meal_plan_chain.ainvoke(
         {
             "user_info": user_info_json,
             "available_groceries": groceries_json,
@@ -20,9 +20,10 @@ def all_meal_generator(user_records, available_groceries_of_user):
     return result.dict()
 
 
-def change_meal_plan_query_validator(query):
 
-    result = meal_change_validator_chain.invoke(
+async def change_meal_plan_query_validator(query):
+
+    result = await meal_change_validator_chain.ainvoke(
         {
             "user_request": query,
             "format_instructions": meal_change_validator_parser.get_format_instructions(),
@@ -32,13 +33,13 @@ def change_meal_plan_query_validator(query):
     return result
 
 
-def change_meal_plan(user_records, available_groceries_of_user, query):
+async def change_meal_plan(user_records, available_groceries_of_user, query):
 
     pre = InfoPreProcessing()
     user_info_json = pre.format_user_records_for_llm_json(user_records)
     groceries_json = pre.format_groceries_for_llm_json(available_groceries_of_user)
 
-    result = meal_change_chain.invoke(
+    result = await meal_change_chain.ainvoke(
         {
             "user_info": user_info_json,
             "available_groceries": groceries_json,
@@ -50,12 +51,11 @@ def change_meal_plan(user_records, available_groceries_of_user, query):
     return result
 
 
-def health_habit_alert(user_records):
-
+async def health_habit_alert(user_records):
     pre = InfoPreProcessing()
     user_info_json = pre.format_user_records_for_llm_json(user_records)
 
-    result = health_alert_chain.invoke(
+    result = await health_alert_chain.ainvoke(
         {
             "user_info": user_info_json,
             "format_instructions": health_alert_parser.get_format_instructions(),
@@ -65,9 +65,9 @@ def health_habit_alert(user_records):
     return result
 
 
-def grocery_product_validation(query):
+async def grocery_product_validation(query):
 
-    result = grocery_product_validator_chain.invoke(
+    result = await grocery_product_validator_chain.ainvoke(
         {
             "user_request": query,
             "format_instructions": grocery_product_validator_parser.get_format_instructions(),
@@ -77,9 +77,9 @@ def grocery_product_validation(query):
     return result
 
 
-def grocery_product_generation(query):
+async def grocery_product_generation(query):
 
-    result = grocery_product_generator_chain.invoke(
+    result = await grocery_product_generator_chain.ainvoke(
         {
             "user_request": query,
             "format_instructions": grocery_product_parser.get_format_instructions(),

@@ -6,6 +6,9 @@ import { IoIosWarning } from "react-icons/io";
 import { IoBagCheck } from "react-icons/io5";
 import { useApi } from "../../utils/api";
 import { grid } from 'ldrs';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 grid.register();
 
 function ProductSearch() {
@@ -14,7 +17,6 @@ function ProductSearch() {
     const [query, setQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false)
     const [text, setText] = useState("");
-
     const [displayText, setDisplayText] = useState("");
     const [index, setIndex] = useState(0); // current phrase
     const [subIndex, setSubIndex] = useState(0); // current char
@@ -26,6 +28,18 @@ function ProductSearch() {
     const [selectedShop, setSelectedShop] = useState("All Shops");
     const [sortOption, setSortOption] = useState("Default");
     const [shoppingList, setShoppingList] = useState([]);
+
+    const errorAddingCart = () => {
+        toast.error("Item is already selected", {
+        position: "bottom-right",
+        autoClose: 5000, 
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: undefined,
+    });
+    }
 
 
     const isFirstLoad = useRef(true);
@@ -50,11 +64,22 @@ function ProductSearch() {
         if (!shoppingList.find((i) => i.name === item.name)) {
             setShoppingList((prev) => [...prev, item]);
         }
+        else {
+            errorAddingCart();
+            
+        }
     };
     // Remove item
     const removeItem = (name) => {
         setShoppingList((prev) => prev.filter((i) => i.name !== name));
     };
+    // Compute total price
+    const totalPrice = shoppingList.reduce((sum, item) => {
+
+        const price = parseFloat(item.discounted_price || item.original_price);
+        return sum + price;
+    }, 0);
+
 
 
 
@@ -186,6 +211,7 @@ function ProductSearch() {
 
     return (
         <main className="container mx-auto px-4 sm:px-6 ">
+            <ToastContainer />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
                     <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -425,6 +451,9 @@ function ProductSearch() {
                             <h2 className="text-xl font-semibold text-gray-900">
                                 Shopping List
                             </h2>
+                            <span
+                                className="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full"
+                            >{shoppingList.length} items</span>
                         </div>
                         {/* <div className="space-y-3">
                             <div className="flex justify-between items-center">
@@ -495,8 +524,10 @@ function ProductSearch() {
                         <div className="border-t border-gray-200 my-4"></div>
                         <div className="flex justify-between items-center mb-4">
                             <p className="text-gray-600 font-medium">Total:</p>
-                            <p className="text-xl font-bold text-gray-900">$13.47</p>
+                            <p className="text-xl font-bold text-gray-900">৳{totalPrice.toFixed(2)}</p>
                         </div>
+                        
+
                         <button
                             className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg flex items-center justify-center hover:bg-blue-700"
                         >

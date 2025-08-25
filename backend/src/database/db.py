@@ -1,6 +1,16 @@
 from fastapi import HTTPException
 import json
 
+# ✅ Delete old user meal info
+async def delete_old_user_meal_info(cursor, conn, user_id: str):
+    try:
+        await cursor.execute("DELETE FROM food_planning WHERE user_id=%s", (user_id,))
+        await conn.commit()
+        return {"deleted": cursor.rowcount}
+    except Exception as e:
+        await conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ✅ Store survey info in food_planning
 async def store_users_foodPlanning_info(cursor, conn, user_id: str, survey_data: dict):
     try:

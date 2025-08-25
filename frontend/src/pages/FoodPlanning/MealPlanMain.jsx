@@ -41,6 +41,7 @@ function MealPlanMain() {
     const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
     const generate_meal = async () => {
+        setMealData([])
         setIsLoading(true);
 
         try {
@@ -144,8 +145,16 @@ function MealPlanMain() {
                         </div>
                     </div>
 
+                    {/* Loader overlay */}
+                    {isLoading && (
+                                <div className="m-50 col-span-full inset-0 flex items-center justify-center bg-white bg-opacity-70 z-10">
+                                    <l-grid size="60" speed="1.5" color="black"></l-grid>
+                                </div>
+                            )}
+
                     {/* Content */}
-                    {mealData.length === 0 ? (
+                    {(!isLoading && mealData.length === 0)? (
+                    // {mealData.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-96 text-center px-6">
                             <div className="w-20 h-20 rounded-full bg-[#f0f4ff] flex items-center justify-center mb-4">
                                 <svg

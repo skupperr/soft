@@ -238,6 +238,20 @@ function MealSurvey() {
             console.error("Error submitting survey:", error);
         } finally {
             setIsLoading(false);
+            healthAlertGenerator();
+        }
+    };
+
+    const healthAlertGenerator = async () => {
+        try {
+            const res = await makeRequest("health-habit-alert", { method: "POST" });
+            if (res.status === "success") {
+                console.log(res);
+            }
+        } catch (err) {
+            console.error("❌ Error fetching data:", err.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 

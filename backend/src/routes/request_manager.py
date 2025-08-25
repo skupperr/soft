@@ -32,10 +32,13 @@ async def storing_food_planning_survey(
         user_details = authenticate_and_get_user_details(request_obj)
         user_id = user_details.get("user_id")
 
+        await db.delete_old_user_meal_info(cursor, conn, user_id)
+
         # Convert list of Q/A → dict
         survey_data = {ans.question.lower().replace(" ", "_"): ans.answer for ans in input}
 
         record = await db.store_users_foodPlanning_info(cursor, conn, user_id, survey_data)
+        
         return {"status": "success"}
 
     except Exception as e:
@@ -73,7 +76,7 @@ async def generate_grocery_product(
         user_details = authenticate_and_get_user_details(request)
         user_id = user_details.get("user_id")
 
-        validation_result = ai_meal_generator.grocery_product_validation(query)
+        validation_result = await ai_meal_generator.grocery_product_validation(query)
 
         validation_dict = validation_result.dict()   # pydantic to Dict
 
@@ -82,7 +85,7 @@ async def generate_grocery_product(
 
         if status == "valid":
 
-            result = ai_meal_generator.grocery_product_generation(query)
+            result = await ai_meal_generator.grocery_product_generation(query)
             
             # Suppose your LLM output was parsed into Pydantic
             grocery_list: GroceryList = result  # result is already a GroceryList object
@@ -119,7 +122,7 @@ async def all_meal_generator(request: Request = None, db_dep=Depends(get_db)):
         user_records = await db.get_user_food_planning_info(cursor, user_id)
         available_groceries_of_user = await db.get_groceries_by_user(cursor, user_id)
 
-        weekly_plan = ai_meal_generator.all_meal_generator(user_records, available_groceries_of_user)  # Pydantic model
+        weekly_plan = await ai_meal_generator.all_meal_generator(user_records, available_groceries_of_user)  # Pydantic model
 
         # Minimal change: insert one by one (works fine)
         for day, day_plan in weekly_plan["meal_plan"].items():
@@ -169,7 +172,7 @@ async def change_meal_plan(
         user_details = authenticate_and_get_user_details(request)
         user_id = user_details.get("user_id")
 
-        validation_result = ai_meal_generator.change_meal_plan_query_validator(query)
+        validation_result = await ai_meal_generator.change_meal_plan_query_validator(query)
 
         validation_dict = validation_result.dict()   # pydantic to Dict
 
@@ -180,7 +183,7 @@ async def change_meal_plan(
             user_records = await db.get_user_food_planning_info(cursor, user_id)
             available_groceries_of_user = await db.get_groceries_by_user(cursor, user_id)
 
-            new_meal = ai_meal_generator.change_meal_plan(user_records, available_groceries_of_user, query)
+            new_meal = await ai_meal_generator.change_meal_plan(user_records, available_groceries_of_user, query)
             new_meal = new_meal.dict()
 
             await db.change_meal(cursor, conn, user_id, new_meal)
@@ -209,7 +212,7 @@ async def health_habit_alert(
 
         user_records = await db.get_user_food_planning_info(cursor, user_id)
 
-        result = ai_meal_generator.health_habit_alert(user_records)
+        result = await ai_meal_generator.health_habit_alert(user_records)
 
         result = result.dict()
 
