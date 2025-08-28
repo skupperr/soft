@@ -30,6 +30,9 @@ export function Layout() {
                 ></div>
             </div>
         </header>
+
+        {/* Will implement chatbot ui */}
+
         <main className="app-main pt-16">
             <SignedOut>
                 <Navigate to="/sign-in" replace></Navigate>
