@@ -10,6 +10,7 @@ import ProductSearch from './pages/FoodPlanning/ProductSearch'
 import RoutineDashboard from './pages/RoutineDashboard'
 import RoutineEdit from './pages/RoutineEdit'
 import MealSurvey from './pages/FoodPlanning/MealSurvay'
+import ChatPage from './layout/ChatPage'
 
 import './App.css'
 
@@ -23,33 +24,35 @@ function ProtectedMealPlan() {
   return <MealPlan />;
 }
 
+import { ChatProvider } from "./layout/ChatContext";
+
 function App() {
-  return <ClerkProviderWithRoutes>
-    <Routes>
-      <Route path="/sign-in/*" element={<AuthenticationPage />} />
-      <Route path="/sign-up" element={<AuthenticationPage />} />
-      <Route element={<Layout />}>
-        <Route path="/" />
-        <Route path="/meal-survey" element={<MealSurvey />} />
-        {/* <Route path="/" element={<Navigate to="/pages" replace />} /> */}
-        {/* <Route path="/meal-plan" element={<MealPlan />} /> */}
-        {/* <Route path="/meal-plan/*" element={<MealPlan />}> */}
-        <Route path="/meal-plan/*" element={<ProtectedMealPlan />}>
-          <Route index element={<MealPlanMain />} /> {/* default */}
-          <Route path="grocery-list" element={<GroceryList />} />
-          <Route path="grocery-list/product-search" element={<ProductSearch />} />
-        </Route>
-        <Route path="/manage-day/*"  >
-          <Route index element={<RoutineDashboard />} />
-          <Route path="edit" element={<RoutineEdit />} />
-
-        </Route>
-
-      </Route>
-    </Routes>
-  </ClerkProviderWithRoutes>
-
+  return (
+    <ClerkProviderWithRoutes>
+      <ChatProvider>   {/* ✅ Wrap all routes here */}
+        <Routes>
+          <Route path="/sign-in/*" element={<AuthenticationPage />} />
+          <Route path="/sign-up" element={<AuthenticationPage />} />
+          <Route element={<Layout />}>
+            <Route path="/" />
+            <Route path="/chat" element={<ChatPage />} />   {/* now safe */}
+            <Route path="/meal-survey" element={<MealSurvey />} />
+            <Route path="/meal-plan/*" element={<ProtectedMealPlan />}>
+              <Route index element={<MealPlanMain />} />
+              <Route path="grocery-list" element={<GroceryList />} />
+              <Route path="grocery-list/product-search" element={<ProductSearch />} />
+            </Route>
+            <Route path="/manage-day/*">
+              <Route index element={<RoutineDashboard />} />
+              <Route path="edit" element={<RoutineEdit />} />
+            </Route>
+          </Route>
+        </Routes>
+      </ChatProvider>
+    </ClerkProviderWithRoutes>
+  );
 }
+
 
 
 export default App
