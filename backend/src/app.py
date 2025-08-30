@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import request_manager
+from .routes import request_manager, chat
 from .database.database import init_pool, close_pool
 
 app = FastAPI()
@@ -22,4 +22,5 @@ async def _shutdown():
     await close_pool()
 
 app.include_router(request_manager.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")
 # app.include_router(webhooks.router, prefix="/webhooks")

@@ -5,13 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiMaximize2 } from "react-icons/fi";
 import { RxCross2 } from "react-icons/rx";
 import { useChat } from "./ChatContext";
+import { useApi } from "../../utils/api";
 
 function ChatWidget() {
 
+    const { makeRequest } = useApi();
     const [isOpen, setIsOpen] = useState(false);
-    // const [messages, setMessages] = useState([
-    //     { sender: "ai", text: "Hi 👋 How can I help you today?" },
-    // ]);
     const [input, setInput] = useState("");
     const messagesEndRef = useRef(null);
     // const [isTyping, setIsTyping] = useState(false);
@@ -26,36 +25,67 @@ function ChatWidget() {
 
 
 
-    const handleSend = (e) => {
+    const handleSend = async (e) => {
         e.preventDefault();
-        setInput("")
         if (!input.trim()) return;
 
         const userMessage = { sender: "user", text: input };
         setMessages((prev) => [...prev, userMessage]);
+        setInput("");
+        const textarea = document.getElementById("chat-input");
+        if (textarea) textarea.style.height = "48px";
 
-        setTimeout(() => {
-            const aiText = "This is a sample AI response with typing effect.";
-            setIsTyping(true);
 
-            let i = 0;
-            const typingInterval = setInterval(() => {
-                i++;
-                setMessages((prev) => [
-                    ...prev.slice(0, -1),
-                    { sender: "ai", text: aiText.slice(0, i) }
-                ]);
+        // ✅ Prepare last 20 messages (10 user + 10 AI)
+        const prepareMessages = (allMessages) => {
+            const userMsgs = allMessages.filter((m) => m.sender === "user").slice(-10);
+            const aiMsgs = allMessages.filter((m) => m.sender === "ai").slice(-10);
 
-                if (i === aiText.length) {
-                    clearInterval(typingInterval);
-                    setIsTyping(false);
-                }
-            }, 40); // typing speed (ms per character)
+            // Interleave in order of appearance (not just separate lists)
+            const last20 = allMessages.filter(
+                (m) => userMsgs.includes(m) || aiMsgs.includes(m)
+            );
 
-            // push a placeholder AI message first
-            setMessages((prev) => [...prev, { sender: "ai", text: "" }]);
-        }, 800);
+            return last20.slice(-20); // ensure max 20
+        };
 
+        // ✅ Send latest 20 messages to backend
+        try {
+            const allMessages = [...messages, userMessage]; // include new message
+            const latest20 = prepareMessages(allMessages);
+
+            const res = await makeRequest("ai-chat-answer", {
+                method: "POST",
+                body: JSON.stringify({ conversation: latest20 }),
+            });
+
+            const aiText = res.ai_reply;
+
+            // Typing effect
+            setTimeout(() => {
+                setIsTyping(true);
+
+                let i = 0;
+                const typingInterval = setInterval(() => {
+                    i++;
+                    setMessages((prev) => [
+                        ...prev.slice(0, -1),
+                        { sender: "ai", text: aiText.slice(0, i) },
+                    ]);
+
+                    if (i === aiText.length) {
+                        clearInterval(typingInterval);
+                        setIsTyping(false);
+                    }
+                }, 40);
+
+                // push placeholder AI msg first
+                setMessages((prev) => [...prev, { sender: "ai", text: "" }]);
+            }, 800);
+
+        } catch (err) {
+            console.error("Error sending messages to backend:", err);
+        }
     };
     return (
         <div>

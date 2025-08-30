@@ -3,12 +3,14 @@ import { RiRobot3Fill } from "react-icons/ri";
 import { useChat } from "./ChatContext";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useApi } from "../../utils/api";
 
 
 function ChatPage() {
     const { messages, setMessages, setIsTyping } = useChat();
     const [input, setInput] = useState("");
     const messagesEndRef = useRef(null);
+    const { makeRequest } = useApi();
 
     // ✅ Auto-scroll when new messages arrive
     useEffect(() => {
@@ -47,37 +49,38 @@ function ChatPage() {
             const allMessages = [...messages, userMessage]; // include new message
             const latest20 = prepareMessages(allMessages);
 
-            await fetch("http://localhost:8000/api/chat", {
+            const res = await makeRequest("ai-chat-answer", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ conversation: latest20 }),
             });
+
+            const aiText = res.ai_reply;
+
+            // Typing effect
+            setTimeout(() => {
+                setIsTyping(true);
+
+                let i = 0;
+                const typingInterval = setInterval(() => {
+                    i++;
+                    setMessages((prev) => [
+                        ...prev.slice(0, -1),
+                        { sender: "ai", text: aiText.slice(0, i) },
+                    ]);
+
+                    if (i === aiText.length) {
+                        clearInterval(typingInterval);
+                        setIsTyping(false);
+                    }
+                }, 40);
+
+                // push placeholder AI msg first
+                setMessages((prev) => [...prev, { sender: "ai", text: "" }]);
+            }, 800);
+
         } catch (err) {
             console.error("Error sending messages to backend:", err);
         }
-
-        // Fake AI response with typing effect
-        setTimeout(() => {
-            const aiText = "This is a sample AI response with typing effect.";
-            setIsTyping(true);
-
-            let i = 0;
-            const typingInterval = setInterval(() => {
-                i++;
-                setMessages((prev) => [
-                    ...prev.slice(0, -1),
-                    { sender: "ai", text: aiText.slice(0, i) },
-                ]);
-
-                if (i === aiText.length) {
-                    clearInterval(typingInterval);
-                    setIsTyping(false);
-                }
-            }, 40);
-
-            // push placeholder AI msg first
-            setMessages((prev) => [...prev, { sender: "ai", text: "" }]);
-        }, 800);
     };
 
     return (
@@ -178,6 +181,7 @@ function ChatPage() {
                                                 {msg.text}
                                             </p>
                                         </motion.div>
+                                        <div ref={messagesEndRef} />
                                     </div>
                                 ))}
                             </AnimatePresence>
