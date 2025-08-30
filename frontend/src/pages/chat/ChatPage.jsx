@@ -18,7 +18,7 @@ function ChatPage() {
     }, [messages]);
 
     // ✅ Handle Send
-    const handleSend = (e) => {
+    const handleSend = async (e) => {
         e.preventDefault();
         if (!input.trim()) return;
 
@@ -26,7 +26,35 @@ function ChatPage() {
         setMessages((prev) => [...prev, userMessage]);
         setInput("");
         const textarea = document.getElementById("chat-input");
-        if (textarea) textarea.style.height = "48px"; // reset height
+        if (textarea) textarea.style.height = "48px";
+
+
+        // ✅ Prepare last 20 messages (10 user + 10 AI)
+        const prepareMessages = (allMessages) => {
+            const userMsgs = allMessages.filter((m) => m.sender === "user").slice(-10);
+            const aiMsgs = allMessages.filter((m) => m.sender === "ai").slice(-10);
+
+            // Interleave in order of appearance (not just separate lists)
+            const last20 = allMessages.filter(
+                (m) => userMsgs.includes(m) || aiMsgs.includes(m)
+            );
+
+            return last20.slice(-20); // ensure max 20
+        };
+
+        // ✅ Send latest 20 messages to backend
+        try {
+            const allMessages = [...messages, userMessage]; // include new message
+            const latest20 = prepareMessages(allMessages);
+
+            await fetch("http://localhost:8000/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ conversation: latest20 }),
+            });
+        } catch (err) {
+            console.error("Error sending messages to backend:", err);
+        }
 
         // Fake AI response with typing effect
         setTimeout(() => {
@@ -142,8 +170,8 @@ function ChatPage() {
                                             exit={{ opacity: 0, y: -10 }}
                                             transition={{ duration: 0.2 }}
                                             className={`p-4 max-w-2xl rounded-2xl ${msg.sender === "user"
-                                                    ? "bg-primary text-[#0e1f0f] rounded-tr-sm"
-                                                    : "bg-secondary/10 bg-opacity-50 rounded-tl-sm"
+                                                ? "bg-primary text-[#0e1f0f] rounded-tr-sm"
+                                                : "bg-secondary/10 bg-opacity-50 rounded-tl-sm"
                                                 }`}
                                         >
                                             <p className="whitespace-pre-wrap break-words">
