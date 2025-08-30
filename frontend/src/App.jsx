@@ -10,7 +10,7 @@ import ProductSearch from './pages/FoodPlanning/ProductSearch'
 import RoutineDashboard from './pages/RoutineDashboard'
 import RoutineEdit from './pages/RoutineEdit'
 import MealSurvey from './pages/FoodPlanning/MealSurvay'
-import ChatPage from './layout/ChatPage'
+import ChatPage from './pages/chat/ChatPage'
 
 import './App.css'
 
@@ -24,12 +24,10 @@ function ProtectedMealPlan() {
   return <MealPlan />;
 }
 
-import { ChatProvider } from "./layout/ChatContext";
 
 function App() {
   return (
     <ClerkProviderWithRoutes>
-      <ChatProvider>   {/* ✅ Wrap all routes here */}
         <Routes>
           <Route path="/sign-in/*" element={<AuthenticationPage />} />
           <Route path="/sign-up" element={<AuthenticationPage />} />
@@ -48,7 +46,6 @@ function App() {
             </Route>
           </Route>
         </Routes>
-      </ChatProvider>
     </ClerkProviderWithRoutes>
   );
 }
