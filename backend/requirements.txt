@@ -9,5 +9,6 @@ BeautifulSoup4
 playwright
 langchain
 langchain-google-genai
-# mysql-connector-python
 aiomysql
+redis 
+fastapi-cache2

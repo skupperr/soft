@@ -5,6 +5,7 @@ import traceback
 from ..utils import authenticate_and_get_user_details
 from ..database.database import get_db
 from ..database import db
+from ..database.redis_db import redis_db_services
 
 router = APIRouter()
 
@@ -20,19 +21,23 @@ class ConversationResponse(BaseModel):
 
 
 @router.post("/ai-chat-answer", response_model=ConversationResponse)
-async def ai_chat_answer(req: ConversationRequest):
+async def ai_chat_answer(req: ConversationRequest, request_obj: Request = None, db_dep=Depends(get_db)):
+    try:
+        cursor, conn = db_dep
+        user_details = authenticate_and_get_user_details(request_obj)
+        user_id = user_details["user_id"]
 
-    conversation = req.conversation
+        user_context = await redis_db_services.get_user_context(user_id, cursor)
 
-    for i in conversation:
-        print(i)
+        # Pull recent conversation messages separately (not cached)
+        conversation = req.conversation
 
-    # Here you would integrate your actual AI model / OpenAI call / LLM
-    # For example, call OpenAI API with conversation messages
-    # For demo, we just echo the last user message
-    last_user_msg = next((m.text for m in reversed(conversation) if m.sender == "user"), "")
-    ai_reply = f"This is a response to: {last_user_msg}"
+        # Dummy AI reply
+        ai_reply = f"AI response using cached context for {user_id}"
 
-    print(ai_reply)
-
-    return {"ai_reply": ai_reply}
+        return {"ai_reply": ai_reply}
+    
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")

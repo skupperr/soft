@@ -24,7 +24,6 @@ function ChatWidget() {
     }, [messages]);
 
 
-
     const handleSend = async (e) => {
         e.preventDefault();
         if (!input.trim()) return;

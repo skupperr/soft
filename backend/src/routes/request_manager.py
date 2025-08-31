@@ -9,6 +9,7 @@ from ..ai_generator.foodPlanning.product_retriever.scrapper_root import fetch_al
 from ..ai_generator.foodPlanning.mealGenerator import ai_meal_generator
 from ..ai_generator.foodPlanning.mealGenerator.schema import GroceryList
 import time, json
+from ..database.redis_db import redis_db_services
 
 router = APIRouter()
 
@@ -119,8 +120,8 @@ async def all_meal_generator(request: Request = None, db_dep=Depends(get_db)):
 
         await db.delete_all_meal(cursor, conn, user_id)
 
-        user_records = await db.get_user_food_planning_info(cursor, user_id)
-        available_groceries_of_user = await db.get_groceries_by_user(cursor, user_id)
+        user_records = await redis_db_services.get_user_food_planning_info(user_id, cursor)
+        available_groceries_of_user = await redis_db_services.get_groceries_by_user(user_id, cursor)
 
         weekly_plan = await ai_meal_generator.all_meal_generator(user_records, available_groceries_of_user)  # Pydantic model
 
@@ -138,7 +139,7 @@ async def all_meal_generator(request: Request = None, db_dep=Depends(get_db)):
                 }
                 await db.add_meal_plan(cursor, conn, meal_data)
 
-        all_meal_plan = await db.get_meal_plan(cursor, user_id)
+        all_meal_plan = await redis_db_services.get_meal_plan(user_id, cursor)
         return {"status": "success", "data": all_meal_plan}
 
     except Exception as e:
@@ -153,12 +154,14 @@ async def get_all_meal(request: Request = None, db_dep=Depends(get_db)):
         user_details = authenticate_and_get_user_details(request)
         user_id = user_details.get("user_id")
 
-        all_meal_plan = await db.get_meal_plan(cursor, user_id)
+        all_meal_plan = await redis_db_services.get_meal_plan(user_id, cursor)
 
         return {"status": "success", "data": all_meal_plan}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch history: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 
 @router.post("/change-meal-plan")
@@ -180,8 +183,8 @@ async def change_meal_plan(
         reason = validation_dict["reason"]
 
         if status == "valid":
-            user_records = await db.get_user_food_planning_info(cursor, user_id)
-            available_groceries_of_user = await db.get_groceries_by_user(cursor, user_id)
+            user_records = await redis_db_services.get_user_food_planning_info(user_id, cursor)
+            available_groceries_of_user = await redis_db_services.get_groceries_by_user(user_id, cursor)
 
             new_meal = await ai_meal_generator.change_meal_plan(user_records, available_groceries_of_user, query)
             new_meal = new_meal.dict()
@@ -210,7 +213,7 @@ async def health_habit_alert(
 
         await db.delete_all_health_alert(cursor, conn, user_id)
 
-        user_records = await db.get_user_food_planning_info(cursor, user_id)
+        user_records = await redis_db_services.get_user_food_planning_info(user_id, cursor)
 
         result = await ai_meal_generator.health_habit_alert(user_records)
 
@@ -232,7 +235,7 @@ async def get_health_alert(request: Request = None, db_dep=Depends(get_db)):
         user_details = authenticate_and_get_user_details(request)
         user_id = user_details.get("user_id")
 
-        health_alerts = await db.get_health_alert(cursor, user_id)
+        health_alerts = await redis_db_services.get_health_alert(user_id, cursor)
 
         return {"status": "success", "data": health_alerts}
 
