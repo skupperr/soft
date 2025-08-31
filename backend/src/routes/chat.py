@@ -27,7 +27,10 @@ async def ai_chat_answer(req: ConversationRequest, request_obj: Request = None, 
         user_details = authenticate_and_get_user_details(request_obj)
         user_id = user_details["user_id"]
 
-        user_context = await redis_db_services.get_user_context(user_id, cursor)
+        user_meal_plan = await redis_db_services.get_meal_plan(user_id, cursor)
+        user_grocery_list = await redis_db_services.get_groceries_by_user(user_id, cursor)
+        user_food_planning_info = await redis_db_services.get_user_food_planning_info(user_id, cursor)
+        user_health_alert = await redis_db_services.get_health_alert(user_id, cursor)
 
         # Pull recent conversation messages separately (not cached)
         conversation = req.conversation

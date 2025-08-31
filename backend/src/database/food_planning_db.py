@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 import json
 from .redis_db.redis_cache_clear import clear_user_cache
+from .redis_db import redis_db_services
 
 # ✅ Delete old user meal info
 async def delete_old_user_meal_info(cursor, conn, user_id: str):
@@ -36,6 +37,7 @@ async def store_users_foodPlanning_info(cursor, conn, user_id: str, survey_data:
         await conn.commit()
 
         await clear_user_cache(user_id, "get_user_food_planning_info")
+        await redis_db_services.get_user_food_planning_info(user_id, cursor)
 
         return {"id": cursor.lastrowid}
     except Exception as e:
@@ -69,6 +71,7 @@ async def add_grocery(cursor, conn, grocery_data: dict, user_id: str):
         await conn.commit()
 
         await clear_user_cache(user_id, "get_groceries_by_user")
+        await redis_db_services.get_groceries_by_user(user_id, cursor)
 
         return {"id": cursor.lastrowid}
     except Exception as e:
@@ -88,6 +91,7 @@ async def update_grocery(cursor, conn, grocery_id: int, updates: dict, user_id:s
         await conn.commit()
 
         await clear_user_cache(user_id, "get_groceries_by_user")
+        await redis_db_services.get_groceries_by_user(user_id, cursor)
 
         return {"updated": cursor.rowcount}
     except Exception as e:
@@ -102,6 +106,7 @@ async def delete_grocery(cursor, conn, grocery_id: int, user_id: str):
         await conn.commit()
 
         await clear_user_cache(user_id, "get_groceries_by_user")
+        await redis_db_services.get_groceries_by_user(user_id, cursor)
 
         return {"deleted": cursor.rowcount}
     except Exception as e:
@@ -128,6 +133,7 @@ async def add_meal_plan(cursor, conn, meal_data: dict):
 
         user_id = meal_data["user_id"]
         await clear_user_cache(user_id, "get_meal_plan")
+        await redis_db_services.get_meal_plan(user_id, cursor)
 
         return {"id": cursor.lastrowid}
     except Exception as e:
@@ -155,6 +161,7 @@ async def add_meal_plan_many(cursor, conn, rows: list[dict]):
 
         user_id = m["user_id"]
         await clear_user_cache(user_id, "get_meal_plan")
+        await redis_db_services.get_meal_plan(user_id, cursor)
 
         return {"inserted": cursor.rowcount}
     except Exception as e:
@@ -184,6 +191,7 @@ async def change_meal(cursor, conn, user_id: str, meal_data: dict):
         await conn.commit()
 
         await clear_user_cache(user_id, "get_meal_plan")
+        await redis_db_services.get_meal_plan(user_id, cursor)
 
         return {"status": "updated"}
     except Exception as e:
@@ -237,6 +245,7 @@ async def insert_health_alert(cursor, conn, user_id: str, alert: dict):
         await conn.commit()
 
         await clear_user_cache(user_id, "get_health_alert")
+        await redis_db_services.get_health_alert(user_id, cursor)
 
         return {"id": cursor.lastrowid}
     except Exception as e:
