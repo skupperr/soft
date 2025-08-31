@@ -44,7 +44,7 @@ function MealPlanMain() {
     const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
     const generate_meal = async () => {
-        setMealData([])
+        setMealData({ weekly: [], daily: [] })
         setIsLoading(true);
 
         try {
@@ -95,23 +95,34 @@ function MealPlanMain() {
 
 
     const updateMeal = (day, mealType, newMeal) => {
-        setMealData(prev =>
-            prev.map(d => {
+        setMealData(prev => {
+            // Update weekly meals
+            const updatedWeekly = prev.weekly.map(d => {
                 if (d.day === day) {
                     const updatedMeals = d.meals.map(m => {
-                        // Compare the meal type by splitting the title
                         const currentType = m.title.split(":")[0].toLowerCase();
                         if (currentType === mealType.toLowerCase()) {
-                            return newMeal; // Replace old meal with newMeal
+                            return newMeal; // replace
                         }
-                        return m; // Keep the old meal
+                        return m;
                     });
                     return { ...d, meals: updatedMeals };
                 }
-                return d; // Keep other days unchanged
-            })
-        );
+                return d;
+            });
+
+            // Recompute daily (today's meals) from updatedWeekly
+            const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+            const todayMeals = updatedWeekly.find(d => d.day.toLowerCase() === today.toLowerCase());
+
+            return {
+                weekly: updatedWeekly,
+                daily: todayMeals ? todayMeals.meals : []
+            };
+        });
     };
+
+
 
 
     return (
@@ -205,10 +216,10 @@ function MealPlanMain() {
                                 </div>
                             ) : (
                                 <div>
-                                <h2 className='text-[22px] font-bold px-4 pb-3 pt-5'>{day}</h2>
-                                {mealData.daily.map((meal, idx) => (
-                                    <MealDaySection key={idx} meals={[meal]} />
-                                ))}
+                                    <h2 className='text-[22px] font-bold px-4 pb-3 pt-5'>{day}</h2>
+                                    {mealData.daily.map((meal, idx) => (
+                                        <MealDaySection key={idx} meals={[meal]} />
+                                    ))}
                                 </div>
                             )
                         ) : (

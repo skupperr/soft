@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 import json
+from .redis_db.redis_cache_clear import clear_user_cache
 
 # ✅ Delete old user meal info
 async def delete_old_user_meal_info(cursor, conn, user_id: str):
@@ -33,6 +34,9 @@ async def store_users_foodPlanning_info(cursor, conn, user_id: str, survey_data:
             survey_data.get("specific_diets"), survey_data.get("meal_plan")
         ))
         await conn.commit()
+
+        await clear_user_cache(user_id, "get_user_food_planning_info")
+
         return {"id": cursor.lastrowid}
     except Exception as e:
         await conn.rollback()
@@ -52,7 +56,7 @@ async def get_groceries_by_user(cursor, user_id: str):
 
 
 # ✅ Insert a new grocery
-async def add_grocery(cursor, conn, grocery_data: dict):
+async def add_grocery(cursor, conn, grocery_data: dict, user_id: str):
     try:
         await cursor.execute("""
             INSERT INTO available_groceries (user_id, grocery_name, available_amount, category, store_link, img_link)
@@ -63,6 +67,9 @@ async def add_grocery(cursor, conn, grocery_data: dict):
             grocery_data.get("store_link", ""), grocery_data.get("img_link", "")
         ))
         await conn.commit()
+
+        await clear_user_cache(user_id, "get_groceries_by_user")
+
         return {"id": cursor.lastrowid}
     except Exception as e:
         await conn.rollback()
@@ -70,7 +77,7 @@ async def add_grocery(cursor, conn, grocery_data: dict):
 
 
 # ✅ Update grocery
-async def update_grocery(cursor, conn, grocery_id: int, updates: dict):
+async def update_grocery(cursor, conn, grocery_id: int, updates: dict, user_id:str):
     if not updates:
         return {"updated": 0}
     # NOTE: consider whitelisting columns to avoid accidental/unsafe keys
@@ -79,6 +86,9 @@ async def update_grocery(cursor, conn, grocery_id: int, updates: dict):
     try:
         await cursor.execute(f"UPDATE available_groceries SET {fields} WHERE ID=%s", tuple(values))
         await conn.commit()
+
+        await clear_user_cache(user_id, "get_groceries_by_user")
+
         return {"updated": cursor.rowcount}
     except Exception as e:
         await conn.rollback()
@@ -86,10 +96,13 @@ async def update_grocery(cursor, conn, grocery_id: int, updates: dict):
 
 
 # ✅ Delete grocery
-async def delete_grocery(cursor, conn, grocery_id: int):
+async def delete_grocery(cursor, conn, grocery_id: int, user_id: str):
     try:
         await cursor.execute("DELETE FROM available_groceries WHERE ID=%s", (grocery_id,))
         await conn.commit()
+
+        await clear_user_cache(user_id, "get_groceries_by_user")
+
         return {"deleted": cursor.rowcount}
     except Exception as e:
         await conn.rollback()
@@ -112,6 +125,10 @@ async def add_meal_plan(cursor, conn, meal_data: dict):
             json.dumps(meal_data["ingredients_used"])
         ))
         await conn.commit()
+
+        user_id = meal_data["user_id"]
+        await clear_user_cache(user_id, "get_meal_plan")
+
         return {"id": cursor.lastrowid}
     except Exception as e:
         await conn.rollback()
@@ -135,6 +152,10 @@ async def add_meal_plan_many(cursor, conn, rows: list[dict]):
             VALUES (%s,%s,%s,%s,%s,%s,%s)
         """, values)
         await conn.commit()
+
+        user_id = m["user_id"]
+        await clear_user_cache(user_id, "get_meal_plan")
+
         return {"inserted": cursor.rowcount}
     except Exception as e:
         await conn.rollback()
@@ -161,6 +182,9 @@ async def change_meal(cursor, conn, user_id: str, meal_data: dict):
             meal_data["meal_type"]
         ))
         await conn.commit()
+
+        await clear_user_cache(user_id, "get_meal_plan")
+
         return {"status": "updated"}
     except Exception as e:
         await conn.rollback()
@@ -172,6 +196,9 @@ async def delete_all_meal(cursor, conn, user_id: str):
     try:
         await cursor.execute("DELETE FROM meal_plan WHERE user_id=%s", (user_id,))
         await conn.commit()
+
+        await clear_user_cache(user_id, "get_meal_plan")
+
         return {"deleted": cursor.rowcount}
     except Exception as e:
         await conn.rollback()
@@ -180,6 +207,7 @@ async def delete_all_meal(cursor, conn, user_id: str):
 
 # ✅ Get meal plan by user
 async def get_meal_plan(cursor, user_id: str):
+    print("🤖")
     await cursor.execute("SELECT * FROM meal_plan WHERE user_id = %s", (user_id,))
     return await cursor.fetchall()
 
@@ -189,6 +217,9 @@ async def delete_all_health_alert(cursor, conn, user_id: str):
     try:
         await cursor.execute("DELETE FROM health_alert WHERE user_id=%s", (user_id,))
         await conn.commit()
+
+        await clear_user_cache(user_id, "get_health_alert")
+
         return {"deleted": cursor.rowcount}
     except Exception as e:
         await conn.rollback()
@@ -204,6 +235,9 @@ async def insert_health_alert(cursor, conn, user_id: str, alert: dict):
             VALUES (%s, %s)
         """, (user_id, alert_json))
         await conn.commit()
+
+        await clear_user_cache(user_id, "get_health_alert")
+
         return {"id": cursor.lastrowid}
     except Exception as e:
         await conn.rollback()

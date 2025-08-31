@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import traceback
 from ..utils import authenticate_and_get_user_details
 from ..database.database import get_db
-from ..database import db
+from ..database import food_planning_db
 from ..database.redis_db import redis_db_services
 
 router = APIRouter()

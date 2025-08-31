@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import traceback
 from ..utils import authenticate_and_get_user_details
 from ..database.database import get_db
-from ..database import db
+from ..database import food_planning_db
 from ..ai_generator.foodPlanning.product_retriever.scrapper_root import fetch_all
 from ..ai_generator.foodPlanning.mealGenerator import ai_meal_generator
 from ..ai_generator.foodPlanning.mealGenerator.schema import GroceryList
@@ -33,12 +33,12 @@ async def storing_food_planning_survey(
         user_details = authenticate_and_get_user_details(request_obj)
         user_id = user_details.get("user_id")
 
-        await db.delete_old_user_meal_info(cursor, conn, user_id)
+        await food_planning_db.delete_old_user_meal_info(cursor, conn, user_id)
 
         # Convert list of Q/A → dict
         survey_data = {ans.question.lower().replace(" ", "_"): ans.answer for ans in input}
 
-        record = await db.store_users_foodPlanning_info(cursor, conn, user_id, survey_data)
+        record = await food_planning_db.store_users_foodPlanning_info(cursor, conn, user_id, survey_data)
         
         return {"status": "success"}
 
@@ -118,7 +118,7 @@ async def all_meal_generator(request: Request = None, db_dep=Depends(get_db)):
         user_details = authenticate_and_get_user_details(request)
         user_id = user_details.get("user_id")
 
-        await db.delete_all_meal(cursor, conn, user_id)
+        await food_planning_db.delete_all_meal(cursor, conn, user_id)
 
         user_records = await redis_db_services.get_user_food_planning_info(user_id, cursor)
         available_groceries_of_user = await redis_db_services.get_groceries_by_user(user_id, cursor)
@@ -137,7 +137,7 @@ async def all_meal_generator(request: Request = None, db_dep=Depends(get_db)):
                     "recipe": meal["steps"],
                     "ingredients_used": meal["ingredients_used"],
                 }
-                await db.add_meal_plan(cursor, conn, meal_data)
+                await food_planning_db.add_meal_plan(cursor, conn, meal_data)
 
         all_meal_plan = await redis_db_services.get_meal_plan(user_id, cursor)
         return {"status": "success", "data": all_meal_plan}
@@ -189,7 +189,7 @@ async def change_meal_plan(
             new_meal = await ai_meal_generator.change_meal_plan(user_records, available_groceries_of_user, query)
             new_meal = new_meal.dict()
 
-            await db.change_meal(cursor, conn, user_id, new_meal)
+            await food_planning_db.change_meal(cursor, conn, user_id, new_meal)
 
             return {"status": "success", "message": "Meal change request is valid.", "data": new_meal}
         else:
@@ -211,7 +211,7 @@ async def health_habit_alert(
         user_details = authenticate_and_get_user_details(request)
         user_id = user_details.get("user_id")
 
-        await db.delete_all_health_alert(cursor, conn, user_id)
+        await food_planning_db.delete_all_health_alert(cursor, conn, user_id)
 
         user_records = await redis_db_services.get_user_food_planning_info(user_id, cursor)
 
@@ -219,7 +219,7 @@ async def health_habit_alert(
 
         result = result.dict()
 
-        await db.insert_health_alert(cursor, conn, user_id, result)
+        await food_planning_db.insert_health_alert(cursor, conn, user_id, result)
 
         return {"status": "success"}
     
