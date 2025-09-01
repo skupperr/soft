@@ -45,7 +45,6 @@ async def ai_chat_answer(req: ConversationRequest, request_obj: Request = None, 
 
         # query = req.conversation[-1].get("content", "")
         query = str(req.conversation[-1])
-        print(query)
         vector_ranker = VectorReranker()
         relevant_domains = vector_ranker.rerank(query, domains)
 
@@ -67,9 +66,6 @@ async def ai_chat_answer(req: ConversationRequest, request_obj: Request = None, 
             for d in retrieved_context
         )
 
-        print(retrieved_context)
-
-        
         # structured_context = (
         #     f"Meal Plan: {user_meal_plan}\n"
         #     f"Groceries: {user_grocery_list}\n"
@@ -89,12 +85,20 @@ async def ai_chat_answer(req: ConversationRequest, request_obj: Request = None, 
         
         # print(retrieved_context)
 
+        # Take the last 20 messages (10 user + 10 ai)
+        messages = req.conversation[-20:]
+
+        # Format into a string for context
+        conversation_context = "\n".join(
+            f"{msg.sender}: {msg.text}" for msg in messages
+        )
+
         chain = build_rag_chain()
 
-        # combined_context = structured_context + "\n\n" + retrieved_context
-        # ai_reply = chain.invoke({"question": query, "context": combined_context})
+        combined_context = retrieved_context
+        ai_reply = chain.invoke({"question": query, "context": combined_context, "conversation_context": conversation_context})
         
-        return {"ai_reply": "ai_reply"}
+        return {"ai_reply": ai_reply}
         
     except Exception as e:
         import traceback
