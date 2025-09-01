@@ -9,8 +9,6 @@ from ..database.database import get_db
 from ..database import food_planning_db
 from ..database.redis_db import redis_db_services
 
-from ..ai_generator.ai_chat.vector_store import get_vector_store
-from ..ai_generator.ai_chat.embedding_services import update_user_vectors
 from ..ai_generator.ai_chat.vector_reranker import VectorReranker
 
 router = APIRouter()
@@ -26,9 +24,6 @@ class ConversationResponse(BaseModel):
     ai_reply: str
 
 
-
-
-# Updated chat.py route
 @router.post("/ai-chat-answer", response_model=ConversationResponse)
 async def ai_chat_answer(req: ConversationRequest, request_obj: Request = None, db_dep=Depends(get_db)):
     try:
@@ -67,12 +62,12 @@ async def ai_chat_answer(req: ConversationRequest, request_obj: Request = None, 
                     })
 
         # Convert to string (pretty formatted for LLM)
-        retrieved_context_str = "\n\n".join(
+        retrieved_context = "\n\n".join(
             f"{d['name']}:\n{json.dumps(d['desc'], indent=2)}"
             for d in retrieved_context
         )
 
-        print(retrieved_context_str)
+        print(retrieved_context)
 
         
         # structured_context = (
@@ -94,7 +89,7 @@ async def ai_chat_answer(req: ConversationRequest, request_obj: Request = None, 
         
         # print(retrieved_context)
 
-        # chain = build_rag_chain()
+        chain = build_rag_chain()
 
         # combined_context = structured_context + "\n\n" + retrieved_context
         # ai_reply = chain.invoke({"question": query, "context": combined_context})
