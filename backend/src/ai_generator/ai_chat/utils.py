@@ -50,7 +50,6 @@ async def ai_answer_generator(query, retrieved_context, conversation_context):
     })
     return ai_reply
 
-
 async def ai_chat_manager(domains, query, message_context):
     
     top_domains = vector_ranker(domains=domains, query=query)

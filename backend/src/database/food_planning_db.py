@@ -83,7 +83,6 @@ async def add_grocery(cursor, conn, grocery_data: dict, user_id: str):
 async def update_grocery(cursor, conn, grocery_id: int, updates: dict, user_id:str):
     if not updates:
         return {"updated": 0}
-    # NOTE: consider whitelisting columns to avoid accidental/unsafe keys
     fields = ", ".join([f"{k}=%s" for k in updates.keys()])
     values = list(updates.values()) + [grocery_id]
     try:
