@@ -1,21 +1,29 @@
 import { useNavigate } from "react-router-dom";
 import React, { useState, useRef, useEffect } from "react";
-
 import { motion, AnimatePresence } from "framer-motion";
 import { FiMaximize2 } from "react-icons/fi";
 import { RxCross2 } from "react-icons/rx";
 import { useChat } from "./ChatContext";
 import { useApi } from "../../utils/api";
+import { infinity } from 'ldrs'
+infinity.register()
 
 function ChatWidget() {
+
+    const { messages,
+        setMessages,
+        isLoading,
+        setIsLoading,
+        chats,
+        setChats,
+        activeChat,
+        setActiveChat, isNewChat, setIsNewChat } = useChat();
 
     const { makeRequest } = useApi();
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState("");
     const messagesEndRef = useRef(null);
-    // const [isTyping, setIsTyping] = useState(false);
     const navigate = useNavigate();
-    const { messages, setMessages, isTyping, setIsTyping } = useChat();
 
     useEffect(() => {
         if (messagesEndRef.current) {
@@ -28,64 +36,71 @@ function ChatWidget() {
         e.preventDefault();
         if (!input.trim()) return;
 
-        const userMessage = { sender: "user", text: input };
+        const userMessage = { sender: "user", message_content: input };
         setMessages((prev) => [...prev, userMessage]);
         setInput("");
         const textarea = document.getElementById("chat-input");
         if (textarea) textarea.style.height = "48px";
 
-
-        // ✅ Prepare last 20 messages (10 user + 10 AI)
-        const prepareMessages = (allMessages) => {
-            const userMsgs = allMessages.filter((m) => m.sender === "user").slice(-10);
-            const aiMsgs = allMessages.filter((m) => m.sender === "ai").slice(-10);
-
-            // Interleave in order of appearance (not just separate lists)
-            const last20 = allMessages.filter(
-                (m) => userMsgs.includes(m) || aiMsgs.includes(m)
-            );
-
-            return last20.slice(-20); // ensure max 20
-        };
-
-        // ✅ Send latest 20 messages to backend
         try {
             const allMessages = [...messages, userMessage]; // include new message
-            const latest20 = prepareMessages(allMessages);
+            const conversation = allMessages.map(({ message_id, time_date, ...rest }) => rest);
 
+            // Set loading state
+            setIsLoading(true);
+
+            // Send to backend
             const res = await makeRequest("ai-chat-answer", {
                 method: "POST",
-                body: JSON.stringify({ conversation: latest20 }),
+                body: JSON.stringify({
+                    conversation: conversation,
+                    new_chat: isNewChat, // <-- flag for backend
+                    chat_id: activeChat // null if new chat
+                }),
             });
 
             const aiText = res.ai_reply;
+            const chatIdFromBackend = res.chat_id;
+
+
+            setIsLoading(false)
+
+            // Update activeChat if this was a new chat
+            if (isNewChat && chatIdFromBackend) {
+                setActiveChat(chatIdFromBackend);
+                setIsNewChat(false); // reset flag
+            }
+
+            // Push placeholder AI message first
+            setMessages((prev) => [...prev, { sender: "assistant", message_content: "" }]);
 
             // Typing effect
-            setTimeout(() => {
-                setIsTyping(true);
+            const length = aiText.length;
+            const minDuration = 2000;
+            const maxDuration = 10000;
+            let targetDuration = length * 25;
+            targetDuration = Math.min(Math.max(targetDuration, minDuration), maxDuration);
+            const interval = targetDuration / length;
 
-                let i = 0;
-                const typingInterval = setInterval(() => {
-                    i++;
-                    setMessages((prev) => [
-                        ...prev.slice(0, -1),
-                        { sender: "ai", text: aiText.slice(0, i) },
-                    ]);
+            let i = 0;
+            const typingInterval = setInterval(() => {
+                i++;
+                setMessages((prev) => [
+                    ...prev.slice(0, -1),
+                    { sender: "assistant", message_content: aiText.slice(0, i) },
+                ]);
 
-                    if (i === aiText.length) {
-                        clearInterval(typingInterval);
-                        setIsTyping(false);
-                    }
-                }, 40);
-
-                // push placeholder AI msg first
-                setMessages((prev) => [...prev, { sender: "ai", text: "" }]);
-            }, 800);
-
+                if (i >= length) {
+                    clearInterval(typingInterval);
+                    setIsLoading(false);
+                }
+            }, interval);
         } catch (err) {
             console.error("Error sending messages to backend:", err);
+            setIsLoading(false);
         }
     };
+
     return (
         <div>
 
@@ -146,11 +161,11 @@ function ChatWidget() {
                                                     : "bg-white border border-[#d8eedd] text-[#0e1f0f]"
                                                     }`}
                                             >
-                                                {msg.text}
+                                                {msg.message_content}
                                             </motion.div>
                                         ))}
 
-                                        {isTyping && (
+                                        {isLoading && (
                                             <motion.div
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
@@ -158,7 +173,14 @@ function ChatWidget() {
                                                 transition={{ duration: 0.2 }}
                                                 className="bg-[#eaf7f0] text-[#4b8673] px-3 py-2 rounded-2xl text-sm inline-block shadow-sm"
                                             >
-                                                typing<span className="animate-pulse">...</span>
+                                                <l-infinity
+                                                    size="25"
+                                                    stroke="3"
+                                                    stroke-length="0.15"
+                                                    bg-opacity="0.1"
+                                                    speed="1.3"
+                                                    color="black"
+                                                ></l-infinity>
                                             </motion.div>
                                         )}
                                     </AnimatePresence>

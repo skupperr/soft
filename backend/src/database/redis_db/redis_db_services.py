@@ -19,25 +19,25 @@ def user_key_builder(func, namespace, request, response, *args, **kwargs):
 
 # ------------------- Cached functions -------------------
 
-@cache(expire=300, key_builder=user_key_builder)
+@cache(expire=600, key_builder=user_key_builder)
 async def get_meal_plan(user_id: str, cursor):
     print(f"[CACHE MISS] Fetching from DB for user: {user_id}")
     return await food_planning_db.get_meal_plan(cursor, user_id)
 
 
-@cache(expire=300, key_builder=user_key_builder)
+@cache(expire=600, key_builder=user_key_builder)
 async def get_user_food_planning_info(user_id: str, cursor):
     print(f"[CACHE MISS] Fetching from DB for user: {user_id}")
     return await food_planning_db.get_user_food_planning_info(cursor, user_id)
 
 
-@cache(expire=300, key_builder=user_key_builder)
+@cache(expire=600, key_builder=user_key_builder)
 async def get_groceries_by_user(user_id: str, cursor):
     print(f"[CACHE MISS] Fetching from DB for user: {user_id}")
     return await food_planning_db.get_groceries_by_user(cursor, user_id)
 
 
-@cache(expire=300, key_builder=user_key_builder)
+@cache(expire=600, key_builder=user_key_builder)
 async def get_health_alert(user_id: str, cursor):
     print(f"[CACHE MISS] Fetching from DB for user: {user_id}")
     return await food_planning_db.get_health_alert(cursor, user_id)

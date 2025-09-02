@@ -4,10 +4,19 @@ import { useChat } from "./ChatContext";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApi } from "../../utils/api";
-
+import { infinity } from 'ldrs'
+infinity.register()
 
 function ChatPage() {
-    const { messages, setMessages, setIsTyping } = useChat();
+    const { messages,
+        setMessages,
+        isLoading,
+        setIsLoading,
+        chats,
+        setChats,
+        activeChat,
+        setActiveChat, isNewChat, setIsNewChat } = useChat();
+
     const [input, setInput] = useState("");
     const messagesEndRef = useRef(null);
     const { makeRequest } = useApi();
@@ -19,80 +28,122 @@ function ChatPage() {
         }
     }, [messages]);
 
+    // ✅ Fetch chat history
+    useEffect(() => {
+        fetchChats();
+    }, []);
+
+    const fetchChats = async () => {
+        try {
+            const res = await makeRequest("get-chats", { method: "GET" });
+
+            // Map backend response to frontend expected format
+            const formattedChats = (res.chats || []).map(chat => ({
+                id: chat.chat_id,
+                title: chat.chat_title
+            }));
+
+            setChats(formattedChats);
+        } catch (err) {
+            console.error("Error fetching chats:", err);
+        }
+    };
+
+
+    // ✅ Load messages when clicking a chat
+    const handleSelectChat = async (chatId) => {
+        try {
+            setActiveChat(chatId);
+            setIsNewChat(false)
+
+            const res = await makeRequest(`get-chat-messages/${chatId}`, {
+                method: "GET",
+            });
+
+            setMessages(res.messages);
+        } catch (err) {
+            console.error("Error fetching chat messages:", err);
+        }
+    };
+
+
     // ✅ Handle Send
     const handleSend = async (e) => {
         e.preventDefault();
         if (!input.trim()) return;
 
-        const userMessage = { sender: "user", text: input };
+        const userMessage = { sender: "user", message_content: input };
         setMessages((prev) => [...prev, userMessage]);
         setInput("");
         const textarea = document.getElementById("chat-input");
         if (textarea) textarea.style.height = "48px";
 
-
-        // ✅ Prepare last 20 messages (10 user + 10 AI)
-        const prepareMessages = (allMessages) => {
-            const userMsgs = allMessages.filter((m) => m.sender === "user").slice(-10);
-            const aiMsgs = allMessages.filter((m) => m.sender === "ai").slice(-10);
-
-            // Interleave in order of appearance (not just separate lists)
-            const last20 = allMessages.filter(
-                (m) => userMsgs.includes(m) || aiMsgs.includes(m)
-            );
-
-            return last20.slice(-20); // ensure max 20
-        };
-
-        // ✅ Send latest 20 messages to backend
         try {
             const allMessages = [...messages, userMessage]; // include new message
-            const latest20 = prepareMessages(allMessages);
+            const conversation = allMessages.map(({ message_id, time_date, ...rest }) => rest);
 
+            // Set loading state
+            setIsLoading(true);
+
+            // Send to backend
             const res = await makeRequest("ai-chat-answer", {
                 method: "POST",
-                body: JSON.stringify({ conversation: latest20 }),
+                body: JSON.stringify({
+                    conversation: conversation,
+                    new_chat: isNewChat, // <-- flag for backend
+                    chat_id: activeChat // null if new chat
+                }),
             });
 
             const aiText = res.ai_reply;
+            const chatIdFromBackend = res.chat_id;
+
+
+            setIsLoading(false)
+
+            // Update activeChat if this was a new chat
+            if (isNewChat && chatIdFromBackend) {
+                setActiveChat(chatIdFromBackend);
+                setIsNewChat(false); // reset flag
+            }
+
+            // Push placeholder AI message first
+            setMessages((prev) => [...prev, { sender: "assistant", message_content: "" }]);
 
             // Typing effect
-            setTimeout(() => {
-                setIsTyping(true);
+            const length = aiText.length;
+            const minDuration = 2000;
+            const maxDuration = 10000;
+            let targetDuration = length * 25;
+            targetDuration = Math.min(Math.max(targetDuration, minDuration), maxDuration);
+            const interval = targetDuration / length;
 
-                let i = 0;
-                const typingInterval = setInterval(() => {
-                    i++;
-                    setMessages((prev) => [
-                        ...prev.slice(0, -1),
-                        { sender: "ai", text: aiText.slice(0, i) },
-                    ]);
+            let i = 0;
+            const typingInterval = setInterval(() => {
+                i++;
+                setMessages((prev) => [
+                    ...prev.slice(0, -1),
+                    { sender: "assistant", message_content: aiText.slice(0, i) },
+                ]);
 
-                    if (i === aiText.length) {
-                        clearInterval(typingInterval);
-                        setIsTyping(false);
-                    }
-                }, 40);
-
-                // push placeholder AI msg first
-                setMessages((prev) => [...prev, { sender: "ai", text: "" }]);
-            }, 800);
-
+                if (i >= length) {
+                    clearInterval(typingInterval);
+                    setIsLoading(false);
+                }
+            }, interval);
         } catch (err) {
             console.error("Error sending messages to backend:", err);
+            setIsLoading(false);
+        }
+        finally{
+            fetchChats();
         }
     };
 
+
     return (
         <>
-            <link
-                href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-                rel="stylesheet"
-            />
-            <link
-                href="https://fonts.googleapis.com/icon?family=Material+Icons"
-                rel="stylesheet"
-            />
+
             <style>{`
                 /* Hide scrollbar but keep wheel/trackpad scrolling */
                 .no-scrollbar {
@@ -117,30 +168,48 @@ function ChatPage() {
                                 <RiRobot3Fill size={30} />
                             </div>
                             <div>
-                                <h1 className="font-bold text-xl">FinanceBot AI</h1>
-                                <p className="text-sm text-gray-400">Smart Money Assistant</p>
+                                <h1 className="font-bold text-xl">Life Assistant</h1>
+                                <p className="text-sm text-gray-400">Smart Life Assistant</p>
                             </div>
                         </div>
-                        <button className="mb-8 w-full bg-primary hover:bg-primary/90 text-background font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                        <button
+                            className="mb-8 w-full cursor-pointer bg-primary hover:bg-primary/90 text-background font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                            onClick={() => {
+                                setMessages([{ sender: "assistant", message_content: "Hi 👋 How can I help you today?" }]);
+                                setInput("");
+                                setActiveChat(null);
+                                setIsNewChat(true);
+                            }}
+                        >
                             <span className="material-icons">add</span>
                             New Chat
                         </button>
+
                     </div>
                     <div className="border-b border-secondary/20"></div>
-                    <div className="p-6 flex-1 overflow-y-auto scrollbar-hide space-y-4">
+                    {/* <div className="p-6 flex-1 overflow-y-auto scrollbar-hide space-y-4">
                         <div className="chat-history-item hover:bg-secondary/20 p-3 rounded-lg cursor-pointer transition-colors">
                             <div className="text-sm font-medium text-text">Budget Analysis Q4</div>
-                        </div>
-                        <div className="chat-history-item hover:bg-secondary/10 p-3 rounded-lg cursor-pointer transition-colors">
-                            <div className="text-sm font-medium text-text">Savings Plan Review</div>
                         </div>
                         <div className="chat-history-item hover:bg-secondary/10 p-3 rounded-lg cursor-pointer transition-colors bg-secondary/10 border-l-2 border-primary">
                             <div className="text-sm font-medium text-text">Monthly Budget Setup</div>
                         </div>
-                        <div className="chat-history-item hover:bg-secondary/10 p-3 rounded-lg cursor-pointer transition-colors">
-                            <div className="text-sm font-medium text-text">Expense Categories</div>
-                        </div>
+                    </div> */}
+                    {/* Sidebar Chat History */}
+                    <div className="p-6 flex-1 overflow-y-auto scrollbar-hide space-y-4">
+                        {chats.map((chat, idx) => (
+                            <div
+                                key={chat.id || idx} // fallback to idx if id is missing
+                                onClick={() => handleSelectChat(chat.id)}
+                                className={`chat-history-item hover:bg-secondary/10 p-3 rounded-lg cursor-pointer transition-colors 
+                                ${activeChat === chat.id ? "bg-secondary/10 border-l-2 border-primary" : ""}`}
+                            >
+                                <div className="text-sm font-medium text-text">{chat.title}</div>
+                            </div>
+                        ))}
+
                     </div>
+
                 </div>
 
                 {/* ✅ Main Chat Area */}
@@ -161,7 +230,7 @@ function ChatPage() {
                                         className={`flex items-start gap-4 ${msg.sender === "user" ? "justify-end" : ""
                                             }`}
                                     >
-                                        {msg.sender === "ai" && (
+                                        {msg.sender === "assistant" && (
                                             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                                                 <RiRobot3Fill color="black" />
                                             </div>
@@ -178,12 +247,31 @@ function ChatPage() {
                                                 }`}
                                         >
                                             <p className="whitespace-pre-wrap break-words">
-                                                {msg.text}
+                                                {msg.message_content}
                                             </p>
                                         </motion.div>
                                         <div ref={messagesEndRef} />
                                     </div>
                                 ))}
+
+                                {/* Inline Loader as AI message */}
+                                {isLoading && (
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                                            <RiRobot3Fill color="black" />
+                                        </div>
+                                        <div className="p-4 max-w-2xl rounded-2xl bg-secondary/10 bg-opacity-50 rounded-tl-sm flex items-center justify-center">
+                                            <l-infinity
+                                                size="35"
+                                                stroke="3"
+                                                stroke-length="0.15"
+                                                bg-opacity="0.1"
+                                                speed="1.3"
+                                                color="white"
+                                            ></l-infinity>
+                                        </div>
+                                    </div>
+                                )}
                             </AnimatePresence>
                         </div>
                     </main>
