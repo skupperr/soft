@@ -7,7 +7,9 @@ def vector_ranker(domains, query):
 
     vector_ranker = VectorReranker()
     relevant_domains = vector_ranker.rerank(query, domains)
-    top_domains = relevant_domains[:2]
+
+    print(relevant_domains)
+    top_domains = relevant_domains[:3]
 
     return top_domains
 

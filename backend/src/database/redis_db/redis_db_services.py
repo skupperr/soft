@@ -1,5 +1,5 @@
 from fastapi_cache.decorator import cache
-from .. import food_planning_db
+from .. import food_planning_db, routine_db
 
 
 def user_key_builder(func, namespace, request, response, *args, **kwargs):
@@ -41,3 +41,8 @@ async def get_groceries_by_user(user_id: str, cursor):
 async def get_health_alert(user_id: str, cursor):
     print(f"[CACHE MISS] Fetching from DB for user: {user_id}")
     return await food_planning_db.get_health_alert(cursor, user_id)
+
+@cache(expire=600, key_builder=user_key_builder)
+async def get_user_routines(user_id: str, cursor):
+    print(f"[CACHE MISS] Fetching from DB for user: {user_id}")
+    return await routine_db.get_user_routines(cursor, user_id)

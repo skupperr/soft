@@ -1,6 +1,8 @@
 from fastapi import HTTPException
 import json
 from datetime import timedelta, datetime
+from .redis_db.redis_cache_clear import clear_user_cache
+from .redis_db import redis_db_services
 
 # ✅ Store weekly routine
 async def store_weekly_routine(cursor, conn, user_id, routine_data):
@@ -17,16 +19,22 @@ async def store_weekly_routine(cursor, conn, user_id, routine_data):
         routine_data["description"]
     ))
     await conn.commit()
+
+    await clear_user_cache(user_id, "get_user_routines")
+    await redis_db_services.get_user_routines(user_id, cursor)
+    
     return cursor.lastrowid   # return routine_id
 
 
 # ✅ Store routine days
-async def store_routine_days(cursor, conn, routine_id, selected_days):
+async def store_routine_days(cursor, conn, routine_id, selected_days, user_id):
     query = "INSERT INTO routine_days (routine_id, day_of_week) VALUES (%s, %s)"
     for day in selected_days:
         await cursor.execute(query, (routine_id, day))
     await conn.commit()
 
+    await clear_user_cache(user_id, "get_user_routines")
+    await redis_db_services.get_user_routines(user_id, cursor)
 
 
 async def get_user_routines(cursor, user_id):
