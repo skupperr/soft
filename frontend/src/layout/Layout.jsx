@@ -1,12 +1,9 @@
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
-import { Outlet, Link, Navigate, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { FiMaximize2 } from "react-icons/fi";
-import { RxCross2 } from "react-icons/rx";
+import { Outlet, Link, Navigate } from "react-router-dom";
 import ChatWidget from '../pages/chat/ChatWidget';
 
 export function Layout() {
-    
+
 
     return (
         <div className="app-layout">
@@ -36,9 +33,14 @@ export function Layout() {
                                     Manage Day
                                 </div>
                             </Link>
-                            <Link to="/">
+                            <Link to="/financial-dashboard">
                                 <div className="text-[#111418] text-sm font-medium leading-normal">
                                     Finance
+                                </div>
+                            </Link>
+                            <Link to="/financial-review">
+                                <div className="text-[#111418] text-sm font-medium leading-normal">
+                                    review
                                 </div>
                             </Link>
                             <UserButton />
@@ -61,8 +63,8 @@ export function Layout() {
                 </SignedIn>
             </main>
 
-            <ChatWidget/>
-            
+            <ChatWidget />
+
         </div>
     );
 }

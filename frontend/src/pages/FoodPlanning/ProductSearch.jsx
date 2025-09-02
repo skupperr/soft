@@ -31,14 +31,14 @@ function ProductSearch() {
 
     const errorAddingCart = () => {
         toast.error("Item is already selected", {
-        position: "bottom-right",
-        autoClose: 5000, 
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        progress: undefined,
-    });
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+        });
     }
 
 
@@ -58,27 +58,41 @@ function ProductSearch() {
         }
         localStorage.setItem("shoppingList", JSON.stringify(shoppingList));
     }, [shoppingList]);
+
     // Add item
     const addItem = (item) => {
-        // prevent duplicates
-        if (!shoppingList.find((i) => i.name === item.name)) {
-            setShoppingList((prev) => [...prev, item]);
-        }
-        else {
-            errorAddingCart();
-            
-        }
+        setShoppingList((prev) => {
+            // Check if item already exists
+            const existing = prev.find(i => i.name === item.name);
+            if (existing) {
+                // Increment quantity
+                return prev.map(i =>
+                    i.name === item.name ? { ...i, quantity: i.quantity + 1 } : i
+                );
+            } else {
+                // Add new item with quantity 1
+                return [...prev, { ...item, quantity: 1 }];
+            }
+        });
     };
-    // Remove item
-    const removeItem = (name) => {
-        setShoppingList((prev) => prev.filter((i) => i.name !== name));
-    };
-    // Compute total price
-    const totalPrice = shoppingList.reduce((sum, item) => {
 
+    // Remove one unit of item
+    const removeItem = (name) => {
+        setShoppingList((prev) =>
+            prev
+                .map(i =>
+                    i.name === name ? { ...i, quantity: i.quantity - 1 } : i
+                )
+                .filter(i => i.quantity > 0) // Remove if quantity is 0
+        );
+    };
+
+
+    const totalPrice = shoppingList.reduce((sum, item) => {
         const price = parseFloat(item.discounted_price || item.original_price);
-        return sum + price;
+        return sum + price * item.quantity;
     }, 0);
+
 
 
 
@@ -476,7 +490,7 @@ function ProductSearch() {
                                 <p className="text-sm text-gray-500">No items added yet.</p>
                             )}
 
-                            {shoppingList.map((item, idx) => (
+                            {/* {shoppingList.map((item, idx) => (
                                 <div
                                     key={idx}
                                     className="flex justify-between items-center p-3 border rounded-lg bg-gray-50"
@@ -517,7 +531,51 @@ function ProductSearch() {
                                         </svg>
                                     </button>
                                 </div>
+                            ))} */}
+
+                            {shoppingList.map((item, idx) => (
+                                <div
+                                    key={idx}
+                                    className="flex justify-between items-center p-3 border rounded-lg bg-gray-50"
+                                >
+                                    <div>
+                                        <a
+                                            href={item.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="font-medium text-gray-800 hover:underline"
+                                        >
+                                            {item.name} {item.quantity > 1 && <span className="text-sm text-gray-500">x{item.quantity}</span>}
+                                        </a>
+                                        <p className="text-sm text-gray-500">
+                                            ৳{(parseFloat(item.discounted_price || item.original_price) * item.quantity).toFixed(2)}
+                                        </p>
+                                    </div>
+                                    <button
+                                        className="text-red-500 hover:text-red-700"
+                                        onClick={() => removeItem(item.name)}
+                                    >
+                                        <svg
+                                            className="w-6 h-6 text-red-800"
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="24"
+                                            height="24"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke="currentColor"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                            />
+                                        </svg>
+                                    </button>
+                                </div>
                             ))}
+
                         </div>
 
 
@@ -526,7 +584,7 @@ function ProductSearch() {
                             <p className="text-gray-600 font-medium">Total:</p>
                             <p className="text-xl font-bold text-gray-900">৳{totalPrice.toFixed(2)}</p>
                         </div>
-                        
+
 
                         <button
                             className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg flex items-center justify-center hover:bg-blue-700"
