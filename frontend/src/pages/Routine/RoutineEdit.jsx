@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { RiRobot2Fill } from "react-icons/ri";
 import { FaSave } from "react-icons/fa";
 import { IoSend } from "react-icons/io5";
-import { useApi } from "../../../../../../../Users/mylif/Downloads/Compressed/LifeLens-main/LifeLens-main/frontend/src/utils/api";
+import { useApi } from "../../utils/api";
 import { useEffect } from 'react';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

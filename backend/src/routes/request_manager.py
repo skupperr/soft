@@ -16,6 +16,18 @@ router = APIRouter()
 class SurveyAnswer(BaseModel):
     question: str
     answer: str | None = None
+    
+# Pydantic models
+class GroceryItem(BaseModel):
+    name: str
+    quantity: int
+    price: float
+
+class GroceryListInput(BaseModel):
+    list_name: str
+    total_price: float
+    items: List[GroceryItem]
+    
 
 @router.get("/test")
 async def test():
@@ -243,3 +255,19 @@ async def get_health_alert(request: Request = None, db_dep=Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Failed to fetch history: {str(e)}")
 
 
+
+
+##Rifat Edits
+@router.post("/add_grocery_list")
+async def add_grocery_list(input: GroceryListInput, request_obj: Request, db_dep=Depends(get_db)):
+    try:
+        cursor, conn = db_dep
+        # get logged-in user id
+        user_details = authenticate_and_get_user_details(request_obj)
+        user_id = user_details.get("user_id")
+
+        list_id = await food_planning_db.store_grocery_list(cursor, conn, user_id, input.list_name, input.total_price, input.items)
+        return {"status": "success", "list_id": list_id}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving grocery list: {str(e)}")

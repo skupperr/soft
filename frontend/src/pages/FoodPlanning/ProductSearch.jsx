@@ -88,10 +88,10 @@ function ProductSearch() {
     };
 
 
-    const totalPrice = shoppingList.reduce((sum, item) => {
-        const price = parseFloat(item.discounted_price || item.original_price);
-        return sum + price * item.quantity;
-    }, 0);
+    // const totalPrice = shoppingList.reduce((sum, item) => {
+    //     const price = parseFloat(item.discounted_price || item.original_price);
+    //     return sum + price * item.quantity;
+    // }, 0);
 
 
 
@@ -220,6 +220,48 @@ function ProductSearch() {
             setIsLoading(false);
         }
     };
+
+    //
+    const [listName, setListName] = useState("");
+
+    const totalPrice = shoppingList.reduce(
+        (sum, item) => sum + parseFloat(item.discounted_price || item.original_price) * item.quantity,
+        0
+    );
+
+    const handleAddToMainList = async () => {
+        if (!listName.trim()) return alert("Please enter a list name");
+
+        const totalPrice = shoppingList.reduce(
+            (sum, item) => sum + (parseFloat(item.discounted_price || item.original_price) * item.quantity),
+            0
+        );
+
+        const payload = {
+            list_name: listName,
+            total_price: parseFloat(totalPrice.toFixed(2)), // match float type
+            items: shoppingList.map(item => ({
+                name: item.name,
+                quantity: item.quantity,
+                price: parseFloat(item.discounted_price || item.original_price),
+            })),
+        };
+
+        try {
+            const data = await makeRequest("add_grocery_list", {
+                method: "POST",
+                body: JSON.stringify(payload),
+            });
+
+            // Assuming your makeRequest resolves JSON if status is ok
+            alert(`List saved successfully! ID: ${data.list_id}`);
+            setListName(""); // clear input
+        } catch (err) {
+            console.error("Error saving shopping list:", err);
+            alert("Failed to save the list. Please try again.");
+        }
+    };
+
 
 
 
@@ -465,9 +507,17 @@ function ProductSearch() {
                             <h2 className="text-xl font-semibold text-gray-900">
                                 Shopping List
                             </h2>
+                            <input
+                                type="text"
+                                placeholder="List name..."
+                                className="ml-4 border rounded px-2 py-1 text-sm"
+                                value={listName}
+                                onChange={(e) => setListName(e.target.value)}
+                            />
                             <span
                                 className="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full"
                             >{shoppingList.length} items</span>
+
                         </div>
                         {/* <div className="space-y-3">
                             <div className="flex justify-between items-center">
@@ -588,6 +638,7 @@ function ProductSearch() {
 
                         <button
                             className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg flex items-center justify-center hover:bg-blue-700"
+                            onClick={handleAddToMainList}
                         >
                             <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7h-1M8 7h-.688M13 5v4m-2-2h4" />
@@ -595,12 +646,12 @@ function ProductSearch() {
 
                             Add to Main List
                         </button>
-                        <button
+                        {/* <button
                             className="w-full mt-2 text-gray-600 bg-gray-200 font-semibold py-3 rounded-lg flex items-center justify-center hover:bg-gray-100"
                         >
                             <FaSave className="w-6 h-6 mr-2 text-gray-800" />
                             Save for Later
-                        </button>
+                        </button> */}
                         <div
                             className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg"
                         >
@@ -649,7 +700,7 @@ function ProductSearch() {
                             <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
                                 <p className="font-semibold text-blue-800 flex items-center">
                                     <svg className="w-6 h-6 mr-2 text-blue-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd" d="M14 7h-4v3a1 1 0 0 1-2 0V7H6a1 1 0 0 0-.997.923l-.917 11.924A2 2 0 0 0 6.08 22h11.84a2 2 0 0 0 1.994-2.153l-.917-11.924A1 1 0 0 0 18 7h-2v3a1 1 0 1 1-2 0V7Zm-2-3a2 2 0 0 0-2 2v1H8V6a4 4 0 0 1 8 0v1h-2V6a2 2 0 0 0-2-2Z" clip-rule="evenodd" />
+                                        <path fillRule="evenodd" d="M14 7h-4v3a1 1 0 0 1-2 0V7H6a1 1 0 0 0-.997.923l-.917 11.924A2 2 0 0 0 6.08 22h11.84a2 2 0 0 0 1.994-2.153l-.917-11.924A1 1 0 0 0 18 7h-2v3a1 1 0 1 1-2 0V7Zm-2-3a2 2 0 0 0-2 2v1H8V6a4 4 0 0 1 8 0v1h-2V6a2 2 0 0 0-2-2Z" clipRule="evenodd" />
                                     </svg>
                                     Bulk
                                     Savings
@@ -667,7 +718,7 @@ function ProductSearch() {
                             >
                                 <p className="font-semibold text-purple-800 flex items-center">
                                     <svg className="w-6 h-6 mr-2 text-purple-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd" />
+                                        <path fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd" />
                                     </svg>
                                     Seasonal
                                 </p>

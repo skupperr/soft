@@ -15,14 +15,11 @@ function DayMealCard({ title, details, image, recipe }) {
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setShowRecipe(!showRecipe)}
-                                className="bg-[#f0f2f4] text-sm font-medium rounded-xl h-8 px-4 w-fit inline-block"
+                                className="bg-[#f0f2f4] mt-5 text-sm cursor-pointer font-medium rounded-xl h-8 px-4 w-fit inline-block"
                             >
                                 <span className="truncate">
                                     {showRecipe ? "Hide Recipe" : "View Recipe"}
                                 </span>
-                            </button>
-                            <button className="bg-[#f0f2f4] text-sm font-medium rounded-xl h-8 px-4 inline-block">
-                                Edit
                             </button>
                         </div>
                     </div>

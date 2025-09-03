@@ -256,3 +256,24 @@ async def insert_health_alert(cursor, conn, user_id: str, alert: dict):
 async def get_health_alert(cursor, user_id: str):
     await cursor.execute("SELECT * FROM health_alert WHERE user_id = %s", (user_id,))
     return await cursor.fetchall()
+
+
+
+##Rifat Edits
+async def store_grocery_list(cursor, conn, user_id, list_name, total_price, items):
+    try:
+        # Insert grocery list
+        query = "INSERT INTO grocery_list (user_id, list_name, total_price) VALUES (%s, %s, %s)"
+        await cursor.execute(query, (user_id, list_name, total_price))
+        list_id = cursor.lastrowid
+
+        # Insert grocery items
+        item_query = "INSERT INTO grocery_items (list_id, name, quantity, price) VALUES (%s, %s, %s, %s)"
+        for item in items:
+            await cursor.execute(item_query, (list_id, item.name, item.quantity, item.price))
+
+        await conn.commit()
+        return list_id
+    except Exception as e:
+        await conn.rollback()
+        raise e
