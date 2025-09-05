@@ -13,32 +13,33 @@ function MealPlanMain() {
     const [mealData, setMealData] = useState({ weekly: [], daily: [] });
     const [day, setDay] = useState(null)
     const [activeTab, setActiveTab] = useState("daily");
+    const [errorDialog, setErrorDialog] = useState(null);
 
 
     useEffect(() => {
-        const fetchMeals = async () => {
-            if (!userId) return;
-
-            setIsLoading(true);
-            setError(null);
-
-            try {
-                const res = await makeRequest("get-all-meal");
-                if (res.status === "success") {
-                    set_Meal_Data(res)
-                } else {
-                    setError("Failed to load meals.");
-                }
-            } catch (err) {
-                console.error("❌ Error fetching meals:", err.message);
-                setError("Permission denied or network error.");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchMeals();
     }, [userId]);
+
+    const fetchMeals = async () => {
+        if (!userId) return;
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const res = await makeRequest("get-all-meal");
+            if (res.status === "success") {
+                set_Meal_Data(res)
+            } else {
+                setError("Failed to load meals.");
+            }
+        } catch (err) {
+            console.error("❌ Error fetching meals:", err.message);
+            setError("Permission denied or network error.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // helper to capitalize
     const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -51,6 +52,9 @@ function MealPlanMain() {
             const res = await makeRequest("all-meal-generator", { method: "POST" });
             if (res.status === "success") {
                 set_Meal_Data(res)
+            } else if (res.status === "rate_limit_error") {
+                setErrorDialog(res.reason);
+                fetchMeals();
             }
         } catch (err) {
             console.error("❌ Error fetching data:", err.message);
@@ -85,7 +89,6 @@ function MealPlanMain() {
                 image: "https://media.post.rvohealth.io/wp-content/uploads/2024/06/oatmeal-bowl-blueberries-strawberries-breakfast-1200x628-facebook.jpg",
                 recipe: parsedRecipe // ✅ FIXED
             };
-            console.log("Recipe for", item.meal_name, ":", parsedRecipe);
 
             if (!grouped[item.meal_day]) {
                 grouped[item.meal_day] = { day: item.meal_day, meals: [] };
@@ -279,6 +282,24 @@ function MealPlanMain() {
                 <MealChangeAndAlerts mealData={mealData} onUpdateMeal={updateMeal} />
 
             </div>
+
+            {/* Error Dialog */}
+            {errorDialog && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 transition-opacity duration-300">
+                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 transform transition-transform duration-300 scale-100">
+                        <h2 className="text-lg font-bold mb-4 text-red-600">Error</h2>
+                        <p className="mb-6 text-gray-700">{errorDialog}</p>
+                        <div className="flex justify-end">
+                            <button
+                                onClick={() => setErrorDialog(null)}
+                                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 

@@ -6,6 +6,8 @@ import { FaSave } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import { IoBagCheck } from "react-icons/io5";
 import { useAuth } from "@clerk/clerk-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const MealChangeAndAlerts = ({ mealData, onUpdateMeal }) => {
 
@@ -98,11 +100,27 @@ const MealChangeAndAlerts = ({ mealData, onUpdateMeal }) => {
             const res = await makeRequest("change-meal-plan", {
                 method: "POST",
                 body: JSON.stringify(text),
+
             });
+
 
             if (res.status === "error") {
                 setErrorDialog(res.reason); // show dialog
-            } else if (res.status === "success" && res.data) {
+            }
+            else if (res.status === "rate_limit_error") {
+                setErrorDialog(res.reason);
+            }
+            else if (res.status === "success" && res.data) {
+
+                toast.success("Meal has been changed as per your request", {
+                    position: "bottom-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: false,
+                    progress: undefined,
+                });
 
                 // res.data.nutrition is already an object, no need to parse
                 const nutrition = res.data.nutrition;
@@ -177,6 +195,7 @@ const MealChangeAndAlerts = ({ mealData, onUpdateMeal }) => {
     return (
 
         <div className="layout-content-container flex-1 flex-col ">
+            <ToastContainer />
             <h1 className="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 text-left pb-3 pt-5">
                 Customize Your Meal Plan
             </h1>
