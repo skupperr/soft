@@ -1,14 +1,18 @@
 {
   "date": "2025-09-16",
-  "summary": "",
+  "summary": "- frontend\\src\\pages\\FoodPlanning\\MealPlanMain.jsx: 145 changes\n- frontend\\src\\layout\\Layout.jsx: 66 changes\n- frontend\\src\\pages\\FoodPlanning\\DayMealCard.jsx: 60 changes\n- frontend\\src\\pages\\FoodPlanning\\MealChangeAndAlerts.jsx: 59 changes\n- frontend\\src\\pages\\FoodPlanning\\MealDaySection.jsx: 10 changes\n- frontend\\src\\layout\\useTheme.jsx: 3 changes\n- frontend\\tailwind.config.js: 1 changes\n- frontend\\package.json: 1 changes\n- frontend\\package-lock.json: 1 changes\n- frontend\\src\\pages\\FoodPlanning\\MealPlane.jsx: 1 changes",
   "statistics": {
-    "totalFiles": 0,
-    "totalChanges": 0,
-    "mostEditedFile": "None",
-    "workDuration": "0h 0m",
-    "fileTypes": {},
-    "peakActivityHour": "0:00-1:00",
-    "totalLinesChanged": 0
+    "totalFiles": 10,
+    "totalChanges": 347,
+    "mostEditedFile": "frontend\\src\\pages\\FoodPlanning\\MealPlanMain.jsx",
+    "workDuration": "3h 13m",
+    "fileTypes": {
+      "js": 1,
+      "jsx": 344,
+      "json": 2
+    },
+    "peakActivityHour": "22:00-23:00",
+    "totalLinesChanged": 76452
   },
   "projectDetails": {
     "branch": "main",
