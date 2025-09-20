@@ -8,7 +8,7 @@ import { IoRestaurantSharp } from "react-icons/io5";
 
 function GroceryList() {
     return (
-        <div className="container mx-auto ">
+        <div className="mx-auto flex-2 px-10">
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Grocery Lists</h1>

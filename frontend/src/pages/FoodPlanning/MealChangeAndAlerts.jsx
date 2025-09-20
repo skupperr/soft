@@ -150,32 +150,34 @@ const MealChangeAndAlerts = ({ mealData, onUpdateMeal }) => {
     // Helper to capitalize meal type
     const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
+
     const colorMap = {
         red: {
-            bg: "bg-red-50",
-            border: "border-red-400",
-            title: "text-red-800",
-            text: "text-red-700",
+            bg: "bg-red-50 dark:bg-red-900",
+            border: "border-red-400 dark:border-red-600",
+            title: "text-red-800 dark:text-red-200",
+            text: "text-red-700 dark:text-red-300",
         },
         orange: {
-            bg: "bg-orange-50",
-            border: "border-orange-400",
-            title: "text-orange-800",
-            text: "text-orange-700",
+            bg: "bg-orange-50 dark:bg-orange-900",
+            border: "border-orange-400 dark:border-orange-600",
+            title: "text-orange-800 dark:text-orange-200",
+            text: "text-orange-700 dark:text-orange-300",
         },
         yellow: {
-            bg: "bg-yellow-50",
-            border: "border-yellow-400",
-            title: "text-yellow-800",
-            text: "text-yellow-700",
+            bg: "bg-yellow-50 dark:bg-yellow-900",
+            border: "border-yellow-400 dark:border-yellow-600",
+            title: "text-yellow-800 dark:text-yellow-200",
+            text: "text-yellow-700 dark:text-yellow-300",
         },
         green: {
-            bg: "bg-green-50",
-            border: "border-green-400",
-            title: "text-green-800",
-            text: "text-green-700",
+            bg: "bg-green-50 dark:bg-green-900",
+            border: "border-green-400 dark:border-green-600",
+            title: "text-green-800 dark:text-green-200",
+            text: "text-green-700 dark:text-green-300",
         },
     };
+
 
 
     const healthAlertGenerator = async () => {
@@ -196,10 +198,10 @@ const MealChangeAndAlerts = ({ mealData, onUpdateMeal }) => {
 
         <div className="layout-content-container flex-1 flex-col ">
             <ToastContainer />
-            <h1 className="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 text-left pb-3 pt-5">
+            <h1 className="text-light-text dark:text-dark-text text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 text-left pb-3 pt-5">
                 Customize Your Meal Plan
             </h1>
-            <p className="text-[#111418] text-base font-normal leading-normal pb-3 pt-1 px-4">
+            <p className="text-light-text/70 dark:text-dark-text text-base font-normal leading-normal pb-3 pt-1 px-4">
                 Not happy with a meal? Select the day and meal you'd like to change, and let us know your cravings or preferences below.
             </p>
             <div className="flex flex-wrap items-end gap-4 px-4 py-3">
@@ -209,8 +211,8 @@ const MealChangeAndAlerts = ({ mealData, onUpdateMeal }) => {
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         placeholder={displayText}
-                        className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#111418] 
-      focus:outline-0 focus:ring-0 border border-[#dce0e5] bg-white focus:border-[#dce0e5] min-h-36 
+                        className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-light-text dark:text-dark-text 
+      focus:outline-0 focus:ring-0 border border-[#dce0e5] dark:border-accent/30 bg-light-background dark:bg-dark-background focus:border-[#dce0e5] min-h-36 
       placeholder:text-[#637488] p-[15px] text-base font-normal leading-normal"
                     />
                 </label>
@@ -219,14 +221,14 @@ const MealChangeAndAlerts = ({ mealData, onUpdateMeal }) => {
                 <button
                     onClick={handleGenerate}
                     disabled={isLoading || mealData.length === 0}
-                    className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#1979e6] text-white text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed shadow hover:shadow-lg transition"
+                    className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-light-text text-sm font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed shadow hover:shadow-lg transition"
                 >
                     <span className="truncate">{isLoading ? "Generating..." : "Generate Meal"}</span>
                 </button>
             </div>
 
 
-            <h3 className="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-4 pt-4">
+            <h3 className="text-light-text dark:text-dark-text text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-4 pt-4">
                 Health Suggestions
             </h3>
 
@@ -259,10 +261,11 @@ const MealChangeAndAlerts = ({ mealData, onUpdateMeal }) => {
 
             <button
                 onClick={healthAlertGenerator}
-                className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#1979e6] text-white text-sm ml-5 mb-5">
+                className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-light-text text-sm ml-5 mb-5">
                 Temp btn for Alert</button>
 
             <div className="grid grid-rows-3 md:grid-rows-3 gap-6 ml-4">
+
 
                 {alerts.map((a, idx) => {
                     const colors = colorMap[a.risk_color] || colorMap.red;
@@ -276,14 +279,13 @@ const MealChangeAndAlerts = ({ mealData, onUpdateMeal }) => {
                                 {a.title}
                             </p>
                             <p className={`text-sm ${colors.text} mt-2`}>{a.issue}</p>
-                            <p
-                                className={`text-sm font-semibold ${colors.title} mt-2 inline-block`}
-                            >
+                            <p className={`text-sm font-semibold ${colors.title} mt-2 inline-block`}>
                                 {a.action}
                             </p>
                         </div>
                     );
                 })}
+
 
             </div>
 
