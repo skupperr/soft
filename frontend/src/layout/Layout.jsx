@@ -10,7 +10,7 @@ export function Layout() {
     const { darkMode, setDarkMode } = useTheme();
 
     return (
-        <div className="app-layout">
+        <div className="app-layout bg-light-background dark:bg-dark-background">
             <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-b-[#f0f2f4] dark:border-b-[#0d3025] px-10 py-3 bg-light-background dark:bg-dark-background">
                 <div className="flex items-center gap-4">
                     <Link to="/">
