@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>MailFlow Inbox</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#007BFF",
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#121212",
+                        "surface-light": "#F8F9FA",
+                        "surface-dark": "#1E1E1E",
+                        "text-light": "#212529",
+                        "text-dark": "#E9ECEF",
+                        "subtext-light": "#6C757D",
+                        "subtext-dark": "#ADB5BD",
+                        "border-light": "#DEE2E6",
+                        "border-dark": "#343A40",
+                        "primary-light-bg": "#E6F2FF",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "8px",
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        .material-icons {
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <aside
+            class="w-64 flex-shrink-0 bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark hidden md:flex flex-col">
+            <div class="p-4 flex items-center gap-3">
+                <img alt="User avatar" class="w-10 h-10 rounded-full"
+                    src="https://lh3.googleusercontent.com/a-/ACNPEu_gM2_A2HhB3hAU1F2lMZXORaQL1Jp1-bS94Qk5=s96-c" />
+                <div>
+                    <p class="font-semibold text-sm text-text-light dark:text-text-dark">Emily Carter</p>
+                    <p class="text-xs text-subtext-light dark:text-subtext-dark">emily@email.com</p>
+                </div>
+            </div>
+            <div class="p-4">
+                <button
+                    class="w-full bg-primary text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 shadow-sm hover:bg-blue-600 transition-colors">
+                    <span class="material-icons">add</span>
+                    Compose
+                </button>
+            </div>
+            <nav class="flex-1 px-2 space-y-1">
+                <a class="flex items-center gap-3 px-4 py-2 rounded-lg bg-primary-light-bg dark:bg-blue-900/30 text-primary dark:text-blue-300 font-semibold"
+                    href="#">
+                    <span class="material-icons">inbox</span>
+                    Inbox
+                    <span class="ml-auto bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">12</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-subtext-light dark:text-subtext-dark"
+                    href="#">
+                    <span class="material-icons">star_outline</span>
+                    Important
+                    <span
+                        class="ml-auto bg-gray-200 dark:bg-gray-700 text-subtext-light dark:text-subtext-dark text-xs font-bold px-2 py-1 rounded-full">3</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-subtext-light dark:text-subtext-dark"
+                    href="#">
+                    <span class="material-icons">send</span>
+                    Sent
+                </a>
+                <a class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-subtext-light dark:text-subtext-dark"
+                    href="#">
+                    <span class="material-icons">drafts</span>
+                    Drafts
+                    <span
+                        class="ml-auto bg-gray-200 dark:bg-gray-700 text-subtext-light dark:text-subtext-dark text-xs font-bold px-2 py-1 rounded-full">2</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-subtext-light dark:text-subtext-dark"
+                    href="#">
+                    <span class="material-icons">delete</span>
+                    Trash
+                </a>
+            </nav>
+            <div class="px-4 py-2">
+                <h2
+                    class="text-xs font-semibold text-subtext-light dark:text-subtext-dark uppercase tracking-wider mb-2">
+                    Labels</h2>
+                <a class="flex items-center gap-3 px-2 py-2 text-subtext-light dark:text-subtext-dark hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                    href="#">
+                    <span class="w-2.5 h-2.5 bg-blue-500 rounded-full"></span> Work
+                </a>
+                <a class="flex items-center gap-3 px-2 py-2 text-subtext-light dark:text-subtext-dark hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                    href="#">
+                    <span class="w-2.5 h-2.5 bg-red-500 rounded-full"></span> Personal
+                </a>
+                <a class="flex items-center gap-3 px-2 py-2 text-subtext-light dark:text-subtext-dark hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                    href="#">
+                    <span class="w-2.5 h-2.5 bg-green-500 rounded-full"></span> Finance
+                </a>
+            </div>
+            <div class="p-4 mt-auto space-y-2">
+                <button
+                    class="w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 shadow-sm hover:bg-green-600 transition-colors">
+                    <span class="material-icons">auto_awesome</span>
+                    AI Assistant
+                </button>
+                <button
+                    class="w-full bg-red-500 text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 shadow-sm hover:bg-red-600 transition-colors">
+                    <span class="material-icons">logout</span>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+        <main
+            class="w-full md:w-96 flex-shrink-0 bg-background-light dark:bg-background-dark border-r border-border-light dark:border-border-dark">
+            <div class="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center">
+                <h2 class="text-xl font-semibold">Inbox</h2>
+                <div class="flex items-center gap-2">
+                    <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <span class="material-icons text-subtext-light dark:text-subtext-dark">more_vert</span>
+                    </button>
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="relative">
+                    <span
+                        class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-subtext-light dark:text-subtext-dark">search</span>
+                    <input
+                        class="w-full pl-10 pr-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg focus:ring-primary focus:border-primary"
+                        placeholder="Search emails..." type="text" />
+                </div>
+            </div>
+            <div class="overflow-y-auto h-[calc(100vh-140px)]">
+                <a class="flex items-start gap-4 p-4 border-b border-border-light dark:border-border-dark bg-primary-light-bg dark:bg-blue-900/30"
+                    href="#">
+                    <img alt="John Smith's avatar" class="w-10 h-10 rounded-full flex-shrink-0"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQzhZKaVvPiAo9ng9SXjSJwx2BMBWKwCdLaZpREMQ9cw-78yb-_koQfEwcZP3hC1iHION5bMDWDzZOg_ksM4Tt7Y8ouF14rrs0iq5ZNyPpTDL827bSHByubYlCtI5zSC2ioqhnktoXE2ThFMRVLlOA6kbKRmnTdNZfzzOOUIkwQ6bur9JALML60g5LU8jy_04E6sEmWSXR-jIXe6i4vBSVe1cNxvmYpsEiHyOMjaZcy44QDCLvoKVxmBO8CSETPvi7DS4g1v3v24M" />
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-semibold text-text-light dark:text-text-dark">John Smith</h3>
+                            <span class="text-xs text-yellow-500 flex items-center gap-1">2m ago <span
+                                    class="material-icons text-sm text-yellow-500">star</span></span>
+                        </div>
+                        <p class="font-medium text-sm text-text-light dark:text-text-dark">Budget Analysis Report</p>
+                        <p class="text-sm text-subtext-light dark:text-subtext-dark truncate">Your monthly spending
+                            analysis is ready for r...</p>
+                    </div>
+                </a>
+                <a class="flex items-start gap-4 p-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    href="#">
+                    <img alt="Sarah Johnson's avatar" class="w-10 h-10 rounded-full flex-shrink-0"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBi1hhJPDxHczmF1mnbDxKOYAmKNEws204Y6eaQYFOVgcGgj-CqSKYw3ClAtiey-MmuXq6XSFegXcS_fUo3jdJpHSurbpprT6ynAWByzQ7DQMDdg4z1VTtrfBGk5WyHAyQc7wpPd35JXN43Ylj8j7akjvLxyHh9BHESAU3kd-22asROStR7LWMDivC9y0NNHdaZNzfIYcI93k2GhEshbsv22EpwRmmyxbtyICXrKeyYjt5NJR7GnBI2Hd4g_Q-w0h-EoKsrwKMvdwI" />
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-semibold text-text-light dark:text-text-dark">Sarah Johnson</h3>
+                            <span class="text-xs text-subtext-light dark:text-subtext-dark">1h ago</span>
+                        </div>
+                        <p class="font-medium text-sm text-text-light dark:text-text-dark">Expense Tracking Tips</p>
+                        <p class="text-sm text-subtext-light dark:text-subtext-dark truncate">Here are some smart ways
+                            to optimize your spendi...</p>
+                    </div>
+                </a>
+                <a class="flex items-start gap-4 p-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    href="#">
+                    <img alt="Mike Chen's avatar" class="w-10 h-10 rounded-full flex-shrink-0"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQETIBDQzGpnjdNT_ePpCOd4HRLoQaRddNbDBYGk-bLbs-XCn4Is2lFxEd0hj9EUhYw0HM6tKV1U8LXKVVKNmSp_sy3yJlDCot3o7vT5AddsGEXWwMODMr1xYTJaksnF-Axw1sf7Un2TH35ZeH3sLGzcU00jF5aekjIwZvPoFQpwHzlqiSpaeezicQdhH7xkt4UoXGqxRM6KVZgqd6Smseyu2383gud8eYaCKo6RpWjbsC_Yr4rSnPlR0dlkCaPWjiX45O0_qZ-m8" />
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-semibold text-text-light dark:text-text-dark">Mike Chen</h3>
+                            <span class="text-xs text-subtext-light dark:text-subtext-dark">3h ago</span>
+                        </div>
+                        <p class="font-medium text-sm text-text-light dark:text-text-dark">Transaction Alert</p>
+                        <p class="text-sm text-subtext-light dark:text-subtext-dark truncate">New transaction detected
+                            in your checking accou...</p>
+                    </div>
+                </a>
+            </div>
+        </main>
+        <section class="flex-1 flex-col h-screen bg-background-light dark:bg-background-dark hidden lg:flex">
+            <div class="p-4 border-b border-border-light dark:border-border-dark flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img alt="John Smith's avatar" class="w-12 h-12 rounded-full"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQzhZKaVvPiAo9ng9SXjSJwx2BMBWKwCdLaZpREMQ9cw-78yb-_koQfEwcZP3hC1iHION5bMDWDzZOg_ksM4Tt7Y8ouF14rrs0iq5ZNyPpTDL827bSHByubYlCtI5zSC2ioqhnktoXE2ThFMRVLlOA6kbKRmnTdNZfzzOOUIkwQ6bur9JALML60g5LU8jy_04E6sEmWSXR-jIXe6i4vBSVe1cNxvmYpsEiHyOMjaZcy44QDCLvoKVxmBO8CSETPvi7DS4g1v3v24M" />
+                    <div>
+                        <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">Budget Analysis Report
+                        </h2>
+                        <p class="text-sm text-subtext-light dark:text-subtext-dark">From: John Smith</p>
+                        <p class="text-sm text-subtext-light dark:text-subtext-dark">Today at 2:30 PM</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"><span
+                            class="material-icons text-subtext-light dark:text-subtext-dark">star_border</span></button>
+                    <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"><span
+                            class="material-icons text-subtext-light dark:text-subtext-dark">reply</span></button>
+                    <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"><span
+                            class="material-icons text-subtext-light dark:text-subtext-dark">more_vert</span></button>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 md:p-8">
+                <div
+                    class="prose dark:prose-invert max-w-none prose-p:text-text-light prose-p:dark:text-text-dark prose-li:text-text-light prose-li:dark:text-text-dark prose-strong:text-text-light prose-strong:dark:text-text-dark">
+                    <p>Hi there,</p>
+                    <p>Your monthly budget analysis is ready! Here's a summary of your spending patterns and some smart
+                        suggestions to help you save money:</p>
+                    <div
+                        class="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg p-6 my-6">
+                        <h3 class="font-semibold text-text-light dark:text-text-dark !mt-0">Key Insights:</h3>
+                        <ul class="space-y-2 !pl-5 !my-4">
+                            <li>You spent 15% more on dining out this month</li>
+                            <li>Subscription services increased by $45</li>
+                            <li>Transportation costs decreased by 8%</li>
+                        </ul>
+                    </div>
+                    <div
+                        class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6 my-6">
+                        <h3 class="font-semibold text-green-800 dark:text-green-300 !mt-0">Smart Savings Suggestions:
+                        </h3>
+                        <ul class="space-y-2 !pl-5 !my-4">
+                            <li class="flex items-start gap-2">
+                                <span class="material-icons text-green-500 mt-1">check_circle</span>
+                                <span>Cancel unused streaming subscriptions to save $25/month</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="material-icons text-green-500 mt-1">check_circle</span>
+                                <span>Cook 2 more meals at home to save $120/month</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="material-icons text-green-500 mt-1">check_circle</span>
+                                <span>Switch to a high-yield savings account for better returns</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <p>Based on your past expenses, we've created an optimized budget plan for next month. You can
+                        review and adjust it in your dashboard.</p>
+                    <p>Best regards,<br />The Finance Team</p>
+                </div>
+            </div>
+            <div class="p-4 border-t border-border-light dark:border-border-dark flex items-center gap-4">
+                <button
+                    class="bg-primary text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 shadow-sm hover:bg-blue-600 transition-colors">
+                    <span class="material-icons">reply</span>
+                    Reply
+                </button>
+                <button
+                    class="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-subtext-light dark:text-text-dark font-semibold py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <span class="material-icons">forward</span>
+                    Forward
+                </button>
+            </div>
+        </section>
+        <aside
+            class="w-80 flex-shrink-0 bg-surface-light dark:bg-surface-dark border-l border-border-light dark:border-border-dark flex-col hidden xl:flex">
+            <div class="p-4 border-b border-border-light dark:border-border-dark flex items-center gap-2">
+                <span class="material-icons text-green-500">auto_awesome</span>
+                <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">AI Assistant</h2>
+            </div>
+            <div class="flex-1 p-4 space-y-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                        <span class="material-icons text-white">auto_awesome</span>
+                    </div>
+                    <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg rounded-tl-none">
+                        <p class="text-sm text-text-light dark:text-text-dark">Hi! I can help you write professional
+                            emails. What would you like to compose?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-border-light dark:border-border-dark">
+                <div class="relative">
+                    <input
+                        class="w-full pr-10 pl-4 py-2 bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-lg focus:ring-primary focus:border-primary"
+                        placeholder="Ask AI to write an email..." type="text" />
+                    <button class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-primary text-white rounded-md">
+                        <span class="material-icons text-lg">send</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+</body>
+
+</html>

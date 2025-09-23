@@ -12,6 +12,7 @@ import RoutineDashboard from './pages/Routine/RoutineDashboard'
 import RoutineEdit from './pages/Routine/RoutineEdit'
 import FinancialDashboard from './pages/FinancialGuide/FinancialDashboard'
 import TransactionDetails from './pages/FinancialGuide/TransactionDetails'
+import Email from './pages/Email/email'
 
 import './App.css'
 
@@ -51,6 +52,9 @@ function App() {
 					</Route>
 					<Route path='/financial-review/*'>
 						<Route index element={<TransactionDetails />} />
+					</Route>
+					<Route path='/email/*'>
+						<Route index element={<Email />} />
 					</Route>
 				</Route>
 			</Routes>

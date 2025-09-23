@@ -28,6 +28,7 @@ export function Layout() {
                             <Link to="/manage-day">Manage Day</Link>
                             <Link to="/financial-dashboard">Finance</Link>
                             <Link to="/financial-review">Review</Link>
+                            <Link to="/email">Email</Link>
 
                             {/* Option 1: Fixed UserButton with proper Action */}
                             <UserButton afterSignOutUrl="/">
