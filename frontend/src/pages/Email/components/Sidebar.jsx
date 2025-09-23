@@ -12,15 +12,15 @@ export const Sidebar = ({ activeView, onViewChange, unreadCount }) => {
   ]
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-      <div className="p-6 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-900">Mail</h1>
+    <div className="w-64 bg-light-background dark:bg-dark-background border-r border-accent/50 flex flex-col">
+      <div className="p-6 border-b border-accent/30">
+        <h1 className="text-2xl font-bold text-light-text dark:text-dark-text">Mail</h1>
       </div>
 
       <div className="p-4">
         <button
           onClick={() => onViewChange("compose")}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+          className="w-full bg-primary hover:bg-primary/70 cursor-pointer text-light-text font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
         >
           <Edit3 size={18} />
           Compose
@@ -32,16 +32,18 @@ export const Sidebar = ({ activeView, onViewChange, unreadCount }) => {
           <button
             key={item.id}
             onClick={() => onViewChange(item.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors duration-200 ${
+            className={`w-full flex items-center gap-3 px-3 py-2 text-left duration-200
+               rounded-xl transition-colors text-light-dark dark:text-dark-text mb-2
+              ${
               activeView === item.id
-                ? "bg-blue-50 text-blue-700 font-medium"
-                : "text-gray-700 hover:bg-gray-50"
+                ? "bg-secondary/10 border-l-2 border-primary"
+                : "text-light-dark dark:text-dark-text hover:bg-accent/10"
             }`}
           >
             <item.icon size={20} />
             <span className="flex-1">{item.label}</span>
             {item.count && item.count > 0 && (
-              <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full">
+              <span className="bg-primary text-light-text text-xs font-medium px-2 py-1 rounded-full">
                 {item.count}
               </span>
             )}

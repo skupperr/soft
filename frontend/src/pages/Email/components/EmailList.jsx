@@ -33,23 +33,22 @@ export const EmailList = ({
   return (
     <div className="flex-1 overflow-y-auto">
       {filteredEmails.length === 0 ? (
-        <div className="flex items-center justify-center h-64 text-gray-500">
+        <div className="flex items-center justify-center h-64 text-gray-500 dark:text-dark-text">
           <div className="text-center">
             <Clock size={48} className="mx-auto mb-4 text-gray-300" />
             <p>No emails to display</p>
           </div>
         </div>
       ) : (
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-accent/50">
           {filteredEmails.map(email => (
             <div
               key={email.id}
               onClick={() => onSelectEmail(email)}
-              className={`p-4 cursor-pointer transition-colors duration-200 hover:bg-gray-50 ${
-                selectedEmail?.id === email.id
-                  ? "bg-blue-50 border-r-4 border-blue-600"
+              className={`p-4 cursor-pointer transition-colors duration-200 hover:bg-accent/10 ${selectedEmail?.id === email.id
+                  ? "bg-accent/20 border-r-4 border-primary"
                   : ""
-              } ${!email.isRead ? "bg-blue-25" : ""}`}
+                } ${!email.isRead ? "bg-blue-25" : ""}`}
             >
               <div className="flex items-start gap-3">
                 <button
@@ -72,28 +71,26 @@ export const EmailList = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <h3
-                      className={`text-sm font-medium truncate ${
-                        !email.isRead ? "text-gray-900" : "text-gray-700"
-                      }`}
+                      className={`text-sm font-medium truncate ${!email.isRead ? "text-gray-900 dark:text-dark-text" : "text-gray-700 dark:text-dark-text/80"
+                        }`}
                     >
                       {email.from}
                     </h3>
-                    <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
+                    <span className="text-xs text-gray-500 dark:text-dark-text/50 ml-2 flex-shrink-0">
                       {formatTime(email.timestamp)}
                     </span>
                   </div>
 
                   <p
-                    className={`text-sm mb-1 truncate ${
-                      !email.isRead
-                        ? "text-gray-900 font-medium"
-                        : "text-gray-700"
-                    }`}
+                    className={`text-sm mb-1 truncate ${!email.isRead
+                        ? "text-primary font-medium"
+                        : "text-gray-700 dark:text-dark-text/60"
+                      }`}
                   >
                     {email.subject}
                   </p>
 
-                  <p className="text-xs text-gray-600 truncate">
+                  <p className="text-xs text-gray-600 dark:text-dark-text/30 truncate">
                     {email.body.substring(0, 100)}...
                   </p>
 

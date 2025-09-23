@@ -75,7 +75,7 @@ function Email() {
     const displayEmails = getDisplayEmails();
 
     return (
-        <div className="h-screen bg-light-background dark:bg-dark-background flex">
+        <div className="h-[calc(100vh-4rem)] bg-light-background dark:bg-dark-background flex">
             <Sidebar
                 activeView={activeView}
                 onViewChange={handleViewChange}
@@ -89,7 +89,7 @@ function Email() {
                         <div className="bg-light-background dark:bg-dark-background border-b border-accent/20 px-6 py-4">
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-xl font-semibold text-light-text dark:text-dark-text">Inbox</h2>
-                                <div className="flex bg-gray-100 rounded-lg p-1">
+                                <div className="flex bg-gray-100 dark:bg-primary rounded-lg p-1">
                                     <button
                                         onClick={() => setActiveTab('important')}
                                         className={`px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${activeTab === 'important'
@@ -124,7 +124,7 @@ function Email() {
 
                     <div className="flex-1 flex">
                         {/* Email List */}
-                        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+                        <div className="w-80 bg-light-background dark:bg-dark-background border-r border-accent/50 flex flex-col">
                             <EmailList
                                 emails={displayEmails}
                                 selectedEmail={selectedEmail}
