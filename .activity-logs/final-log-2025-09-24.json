@@ -1,0 +1,24 @@
+{
+  "date": "2025-09-24",
+  "summary": "- frontend\\src\\pages\\FoodPlanning\\ProductSearch.jsx: 299 changes\n- frontend\\src\\pages\\Routine\\RoutineDashboard.jsx: 248 changes\n- frontend\\src\\pages\\Routine\\RoutineEdit.jsx: 186 changes\n- frontend\\src\\pages\\FoodPlanning\\MealPlanMain.jsx: 151 changes\n- frontend\\src\\pages\\FoodPlanning\\MealSideBarMenu.jsx: 139 changes\n- frontend\\src\\layout\\Layout.jsx: 75 changes\n- frontend\\src\\pages\\FoodPlanning\\MealChangeAndAlerts.jsx: 60 changes\n- frontend\\src\\pages\\FoodPlanning\\DayMealCard.jsx: 60 changes\n- frontend\\src\\pages\\chat\\ChatPage.jsx: 35 changes\n- frontend\\src\\pages\\FoodPlanning\\MealDaySection.jsx: 10 changes\n- frontend\\tailwind.config.js: 4 changes\n- frontend\\src\\layout\\useTheme.jsx: 3 changes\n- frontend\\src\\pages\\FoodPlanning\\GroceryList.jsx: 3 changes\n- .streakagent: 2 changes\n- frontend\\package.json: 1 changes\n- frontend\\package-lock.json: 1 changes\n- frontend\\src\\pages\\FoodPlanning\\MealPlane.jsx: 1 changes",
+  "statistics": {
+    "totalFiles": 17,
+    "totalChanges": 1278,
+    "mostEditedFile": "frontend\\src\\pages\\FoodPlanning\\ProductSearch.jsx",
+    "workDuration": "186h 13m",
+    "fileTypes": {
+      "js": 4,
+      "jsx": 1270,
+      "json": 2,
+      "unknown": 2
+    },
+    "peakActivityHour": "21:00-22:00",
+    "totalLinesChanged": 759411
+  },
+  "projectDetails": {
+    "branch": "main",
+    "commitHash": "ddde53c",
+    "remote": "https://github.com/skupperr/soft.git",
+    "name": "c:\\New folder (2)\\SOFT\\LifeLens"
+  }
+}
