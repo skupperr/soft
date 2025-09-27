@@ -648,9 +648,9 @@ function RoutineEdit() {
 
 
     return (
-        <div className="flex-grow container mx-auto px-6 py-8 bg-light-background dark:bg-dark-background">
+        <div className="flex-grow mx-auto px-6 py-8 bg-light-background dark:bg-dark-background pl-10 pr-10">
             <ToastContainer />
-            <div className="flex grid-cols-1 lg:grid-cols-3 gap-8 ">
+            <div className="flex flex-col lg:flex-row gap-8">
                 <form
                     onSubmit={handleSubmit}
                     className="flex-2 lg:col-span-2 rounded-lg shadow-lg p-6 bg-light-background dark:bg-dark-background border-1 border-accent/70 text-gray-700 dark:text-dark-text"
@@ -889,13 +889,13 @@ function RoutineEdit() {
                     <div className="grid grid-cols-1 h-[calc(100vh-250px)] overflow-y-auto scroll-smooth">
                         {/* Header */}
                         <div className="grid grid-cols-12">
-                            <div className="col-span-1 border-r text-center text-xs py-2 text-gray-500">Time</div>
+                            <div className="col-span-1 text-center text-xs py-2 text-gray-500">Time</div>
                             <div className="col-span-11 pl-4 text-xs py-2 text-gray-500">Tasks</div>
                         </div>
 
                         {Array.from({ length: 24 }).map((_, i) => (
                             <div key={i} className="grid grid-cols-12 border-t border-gray-200 dark:border-accent relative">
-                                <div className="col-span-1 border-r py-4 pr-2 text-right text-sm text-gray-500">
+                                <div className="col-span-1  py-4 pr-2 text-right text-sm text-gray-500">
                                     {String(i).padStart(2, "0")}:00
                                 </div>
                                 <div className="col-span-11 pl-4 relative h-16">
@@ -923,216 +923,7 @@ function RoutineEdit() {
                     </div>
 
 
-                    {/* <div
-                        className="grid grid-cols-1 h-[calc(100vh-250px)] overflow-y-auto scroll-smooth">
-
-                        <div className="grid grid-cols-12">
-                            <div className="col-span-1 border-r border-gray-200">
-                                <div
-                                    className="text-xs text-gray-500 font-medium py-2 text-center"
-                                >
-                                    Time
-                                </div>
-                            </div>
-                            <div className="col-span-11 pl-4">
-                                <div className="text-xs text-gray-500 font-medium py-2">
-                                    Tasks
-                                </div>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                00:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                01:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                02:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                03:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                04:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                05:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                06:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                07:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                08:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                09:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                10:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                11:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                12:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                13:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                14:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                15:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                16:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                17:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                18:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                19:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                20:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                21:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                22:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                        <div className="grid grid-cols-12 border-t border-gray-200">
-                            <div
-                                className="col-span-1 border-r border-gray-200 py-4 pr-2 text-right text-sm text-gray-500"
-                            >
-                                23:00
-                            </div>
-                            <div className="col-span-11 pl-4"></div>
-                        </div>
-                    </div> */}
+                    
                 </div>
                 {showAIHelp && (
                     <div className="bg-light-background dark:bg-dark-background border-1 border-accent/70 rounded-lg p-6 flex flex-col flex-1">

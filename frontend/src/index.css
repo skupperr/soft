@@ -10,6 +10,57 @@ body {
   font-family: "Plus Jakarta Sans", sans-serif;
 }
 
+/* Put this in your global CSS file */
+.email-body, .email-body * {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* Force wrapping for long tokens and URLs */
+.email-body {
+  overflow-wrap: anywhere;    /* modern */
+  word-wrap: break-word;      /* fallback */
+  word-break: break-word;
+}
+
+/* Ensure code/pre blocks wrap instead of overflowing */
+.email-body pre,
+.email-body code {
+  white-space: pre-wrap;      /* preserve newlines but allow wrapping */
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* Images/tables should never expand the column */
+.email-body img,
+.email-body table,
+.email-body iframe,
+.email-body video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* (Optional) If you have the Tailwind Typography plugin, override its pre styling */
+.prose pre {
+  white-space: pre-wrap;
+  overflow: auto;
+  word-break: break-word;
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+textarea{
+  field-sizing: content;
+}
+
 /* :root {
   --color-primary: #5fd068;
   --color-secondary: #4b8673;

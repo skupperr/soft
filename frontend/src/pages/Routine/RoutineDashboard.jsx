@@ -427,7 +427,7 @@ function RoutineDashboard() {
                                                     ? "bg-green-50 dark:bg-green-800 border-green-200"
                                                     : isOverdue
                                                         ? "bg-red-50 dark:bg-[#b33939] border-red-200"
-                                                        : "bg-gray-50 border-gray-200"
+                                                        : "bg-gray-50 dark:bg-dark-background border-accent/70"
                                                 }`}
                                         >
                                             <div className="flex items-center space-x-3">
@@ -458,7 +458,7 @@ function RoutineDashboard() {
                                                     ✖
                                                 </div>
                                             ) : (
-                                                <div className="bg-gray-400 text-white h-6 w-6 rounded-full flex items-center justify-center">
+                                                <div className="bg-white text-white h-6 w-6 rounded-full flex items-center justify-center">
                                                     ⏳
                                                 </div>
                                             )}
