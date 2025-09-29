@@ -6,7 +6,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 infinity.register()
 
-export const AIChatbot = ({ isMinimized, onToggleMinimize }) => {
+export const AIChatbot = ({ isMinimized, onToggleMinimize, isUserLoggedIn }) => {
   const { makeRequest } = useApi();
   const [messages, setMessages] = useState([
     {
@@ -269,63 +269,75 @@ export const AIChatbot = ({ isMinimized, onToggleMinimize }) => {
         </div>
 
         {/* Input + Popover */}
-        <div className="p-4 border-t border-accent/70 relative">
-          {showPopover && (
-            <div className="absolute bottom-14 left-4 bg-white dark:bg-dark-background border-1 dark:text-dark-text dark:border-gray-700 rounded-xl shadow-xl z-10 w-64 overflow-hidden">
-              <ul className="text-sm">
-                {["Write an Email", "Reply to an Email", "Summarize an Email"].map(task => (
-                  <li
-                    key={task}
-                    onClick={() => handleTaskSelect(task)}
-                    className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
-                  >
-                    {task}
-                  </li>
-                ))}
-              </ul>
+        {isUserLoggedIn && (
+          <div className="p-4 border-t border-accent/70 relative">
+            {showPopover && (
+              <div className="absolute bottom-14 left-4 bg-white dark:bg-dark-background border-1 dark:text-dark-text dark:border-gray-700 rounded-xl shadow-xl z-10 w-64 overflow-hidden">
+                <ul className="text-sm">
+                  {/* {["Write an Email", "Reply to an Email", "Summarize an Email"].map(task => ( */}
+                  {["Write an Email"].map(task => (
+                    <li
+                      key={task}
+                      onClick={() => handleTaskSelect(task)}
+                      className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                    >
+                      {task}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="flex gap-2 items-end">
+              <div className="flex-1 flex items-start flex-wrap px-3 py-2 border border-accent/20 rounded-lg focus-within:ring-2 focus-within:ring-primary text-sm text-light-text dark:text-dark-text bg-white dark:bg-dark-background">
+                {selectedTask && (
+                  <span className="flex items-center bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded-full mr-2 mb-1">
+                    {selectedTask}
+                    <button
+                      onClick={() => setSelectedTask("")}
+                      className="ml-1 text-blue-500 hover:text-blue-700 focus:outline-none"
+                    >
+                      ❌
+                    </button>
+                  </span>
+                )}
+
+                <textarea
+                  ref={textareaRef}
+                  value={userText}
+                  onChange={handleChange}
+                  onInput={e => {
+                    e.target.style.height = "auto"
+                    e.target.style.height = `${e.target.scrollHeight}px`
+                  }}
+                  onFocus={() => !selectedTask && userText.trim() === "" && setShowPopover(true)}
+                  onBlur={() => setTimeout(() => setShowPopover(false), 150)}
+                  onKeyPress={handleKeyPress}
+                  placeholder={selectedTask ? "Continue writing..." : "Ask me anything about emails..."}
+                  rows={1}
+                  className="flex-1 min-h-[24px] resize-none overflow-hidden focus:outline-none text-sm bg-transparent"
+                />
+
+              </div>
+              <button
+                onClick={handleSendMessage}
+                disabled={!selectedTask && !userText.trim()}
+                className="p-2 bg-primary text-white rounded-lg hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              >
+                <Send size={16} />
+              </button>
             </div>
-          )}
-
-          <div className="flex gap-2 items-end">
-            <div className="flex-1 flex items-start flex-wrap px-3 py-2 border border-accent/20 rounded-lg focus-within:ring-2 focus-within:ring-primary text-sm text-light-text dark:text-dark-text bg-white dark:bg-dark-background">
-              {selectedTask && (
-                <span className="flex items-center bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded-full mr-2 mb-1">
-                  {selectedTask}
-                  <button
-                    onClick={() => setSelectedTask("")}
-                    className="ml-1 text-blue-500 hover:text-blue-700 focus:outline-none"
-                  >
-                    ❌
-                  </button>
-                </span>
-              )}
-
-              <textarea
-                ref={textareaRef}
-                value={userText}
-                onChange={handleChange}
-                onInput={e => {
-                  e.target.style.height = "auto"
-                  e.target.style.height = `${e.target.scrollHeight}px`
-                }}
-                onFocus={() => !selectedTask && userText.trim() === "" && setShowPopover(true)}
-                onBlur={() => setTimeout(() => setShowPopover(false), 150)}
-                onKeyPress={handleKeyPress}
-                placeholder={selectedTask ? "Continue writing..." : "Ask me anything about emails..."}
-                rows={1}
-                className="flex-1 min-h-[24px] resize-none overflow-hidden focus:outline-none text-sm bg-transparent"
-              />
-
-            </div>
-            <button
-              onClick={handleSendMessage}
-              disabled={!selectedTask && !userText.trim()}
-              className="p-2 bg-primary text-white rounded-lg hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-            >
-              <Send size={16} />
-            </button>
           </div>
-        </div>
+        )}
+
+        {!isUserLoggedIn && (
+          <div className="flex items-center justify-center h-64 text-gray-500 dark:text-dark-text/50 w-50 m-auto">
+            <div className="text-center">
+              <p>Sign In with your Email to enable the AI email features</p>
+            </div>
+          </div>
+        )}
+
       </div>
       {/* Error Dialog */}
       {errorDialog && (

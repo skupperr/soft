@@ -1,13 +1,19 @@
 import React from "react"
 import { Star, StarOff, Clock } from "lucide-react"
+import { grid } from 'ldrs';
+import { useTheme } from '../../../layout/useTheme';
+grid.register();
 
 export const EmailList = ({
     emails,
     selectedEmail,
     onSelectEmail,
     onToggleStar,
-    showImportantOnly = false
+    showImportantOnly = false,
+    isLoading
 }) => {
+
+    const { darkMode } = useTheme();
 
     const filteredEmails = showImportantOnly
         ? emails.filter(email => email.isImportant)
@@ -53,7 +59,16 @@ export const EmailList = ({
 
     return (
         <div className="flex-1 overflow-y-auto min-h-0 scrollbar-hide">
-            {filteredEmails.length === 0 ? (
+            {isLoading && (
+                <div className="mt-70 inset-0 flex items-center justify-center bg-light-background dark:bg-dark-background bg-opacity-70 z-10 dark:text-dark-text">
+                    <l-grid
+                        size="60"
+                        speed="1.5"
+                        color={darkMode ? "white" : "black"}
+                    ></l-grid>
+                </div>
+            )}
+            {!isLoading && filteredEmails.length === 0 ? (
                 <div className="flex items-center justify-center h-64 text-gray-500 dark:text-dark-text">
                     <div className="text-center">
                         <Clock size={48} className="mx-auto mb-4 text-gray-300" />

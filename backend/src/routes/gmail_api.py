@@ -27,7 +27,8 @@ TOKEN_URI = os.getenv("TOKEN_URL")
 
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.send",   # needed for sending
-    "https://www.googleapis.com/auth/gmail.readonly"  # keep this if you still want read access
+    "https://www.googleapis.com/auth/gmail.readonly",  # keep this if you still want read access
+    "https://www.googleapis.com/auth/gmail.modify"
 ]
 
 # STEP 1: Redirect user to Google login
@@ -92,6 +93,23 @@ def auth_status(request: Request):
     return {"logged_in": True}
 
 
+@router.post("/auth/logout")
+def logout(request: Request):
+    try:
+        user_details = authenticate_and_get_user_details(request)
+        user_id = user_details.get("user_id")
+
+        if user_id in USER_TOKENS:
+            del USER_TOKENS[user_id]  # remove tokens from memory/DB
+
+        return {"status": "success", "message": "Logged out"}
+    except Exception as e:
+        print("Caught exception:", type(e), e)
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+
 @router.get("/gmail/inbox")
 def get_inbox(request: Request):
 
@@ -141,7 +159,7 @@ async def generate_email_route(
         user_id = user_details.get("user_id")
 
 
-        # await throttling.apply_rate_limit(user_id, cursor, conn)
+        await throttling.apply_rate_limit(user_id, cursor, conn)
 
         validation_result = await ai_email_generator.email_query_validator(query)
         validation_dict = validation_result.dict()
@@ -233,3 +251,28 @@ async def send_email(
         print("Caught exception:", type(e), e)
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+
+GMAIL_API_BASE = "https://gmail.googleapis.com/gmail/v1"
+@router.post("/gmail/mark-read/{msg_id}")
+def mark_as_read(msg_id: str, request: Request):
+    user_details = authenticate_and_get_user_details(request)
+    user_id = user_details.get("user_id")
+
+    tokens = USER_TOKENS.get(user_id)
+    if not tokens:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+
+    headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+    url = f"{GMAIL_API_BASE}/users/me/messages/{msg_id}/modify"
+
+    res = requests.post(
+        url,
+        headers=headers,
+        json={"removeLabelIds": ["UNREAD"]},
+    )
+
+    if res.status_code == 200:
+        return {"status": "success", "message": "Email marked as read"}
+    else:
+        return JSONResponse(res.json(), status_code=res.status_code)

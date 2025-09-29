@@ -12,6 +12,7 @@ export const useEmails = () => {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     checkLogin();
@@ -19,9 +20,9 @@ export const useEmails = () => {
     // setSentEmails(mockSentEmails);
   }, []);
 
-  useEffect(() => {
-    console.log("Emails updated:", sentEmails);
-  }, [sentEmails]);
+  // useEffect(() => {
+  //   console.log("Emails updated:", sentEmails);
+  // }, [sentEmails]);
 
 
   const checkLogin = async () => {
@@ -33,12 +34,30 @@ export const useEmails = () => {
         getEmail();
       } else {
         setIsUserLoggedIn(false);
-        emailLogin();
       }
     } catch (err) {
       console.error("❌ Error checking login status:", err);
     }
   };
+
+  const signOut = async () => {
+    try {
+      const res = await makeRequest("auth/logout", {
+        method: "POST"
+      });
+
+      if(res.status == "success"){
+        setIsUserLoggedIn(false);
+        setEmails([]);
+        setSentEmails([]);
+        setSpamEmails([])
+      }
+      
+    } catch (err) {
+      console.error("❌ Error checking login status:", err);
+    }
+  };
+
 
   const emailLogin = async () => {
     try {
@@ -50,6 +69,7 @@ export const useEmails = () => {
   };
 
   const getEmail = async () => {
+    setIsLoading(true)
     try {
       const [inboxRes, sentRes, spamRes] = await Promise.all([
         makeRequest("gmail/inbox"),
@@ -57,15 +77,14 @@ export const useEmails = () => {
         makeRequest("gmail/spam")
       ]);
 
-      // const inboxData = await inboxRes.json();
-      // const sentData = await sentRes.json();
-      // setEmails(inboxData.messages);
 
       setEmails(inboxRes.messages);
       setSentEmails(sentRes.messages);
       setSpamEmails(spamRes.messages)
     } catch (err) {
       console.error("❌ Error fetching emails:", err);
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -120,11 +139,17 @@ export const useEmails = () => {
     spamEmails,
     drafts,
     selectedEmail,
+    isUserLoggedIn,
+    isLoading,
     setSelectedEmail,
     markAsRead,
     toggleStar,
     toggleImportant,
     saveDraft,
     sendEmail,
+    setIsUserLoggedIn,
+    emailLogin,
+    setIsLoading,
+    signOut
   };
 };

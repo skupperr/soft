@@ -1,4 +1,5 @@
 import React from "react"
+import { useEffect } from "react";
 import {
   Reply,
   ReplyAll,
@@ -8,8 +9,29 @@ import {
   Star,
   StarOff
 } from "lucide-react"
+import { useApi } from '../../../utils/api';
 
-export const EmailView = ({ email, onToggleStar, onCompose }) => {
+
+export const EmailView = ({ email, onToggleStar }) => {
+  const { makeRequest } = useApi();
+
+  useEffect(() => {
+    if (email?.id) {
+      const markAsRead = async () => {
+        try {
+          await makeRequest(`gmail/mark-read/${email.id}`, {
+            method: "POST",
+          });
+          console.log(`📩 Marked email ${email.id} as read`);
+        } catch (err) {
+          console.error("❌ Failed to mark as read:", err);
+        }
+      };
+
+      markAsRead();
+    }
+  }, [email?.id]);
+
   if (!email) {
     return (
       <div className="flex-1 flex items-center justify-center bg-light-background dark:bg-dark-background">

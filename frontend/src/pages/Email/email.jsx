@@ -12,11 +12,17 @@ function Email() {
         sentEmails,
         spamEmails,
         selectedEmail,
+        isUserLoggedIn,
+        isLoading,
         setSelectedEmail,
         markAsRead,
         toggleStar,
         sendEmail,
         saveDraft,
+        setIsUserLoggedIn,
+        emailLogin,
+        setIsLoading,
+        signOut
     } = useEmails();
 
     const [activeView, setActiveView] = useState('inbox');
@@ -83,6 +89,9 @@ function Email() {
                 activeView={activeView}
                 onViewChange={handleViewChange}
                 unreadCount={unreadCount}
+                isUserLoggedIn={isUserLoggedIn}
+                emailLogin={emailLogin}
+                signOut={signOut}
             />
 
             <div className="flex-1 flex">
@@ -135,6 +144,7 @@ function Email() {
                                 onSelectEmail={handleSelectEmail}
                                 onToggleStar={toggleStar}
                                 showImportantOnly={activeView === 'inbox' && activeTab === 'important'}
+                                isLoading={isLoading}
                             />
                         </div>
 
@@ -155,6 +165,7 @@ function Email() {
                 <AIChatbot
                     isMinimized={isAIMinimized}
                     onToggleMinimize={() => setIsAIMinimized(!isAIMinimized)}
+                    isUserLoggedIn={isUserLoggedIn}
                 />
             </div>
 
