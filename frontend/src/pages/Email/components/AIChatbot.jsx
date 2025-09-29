@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useRef } from "react"
 import { Send, Bot, User, Minimize2 } from "lucide-react"
 import { useApi } from '../../../utils/api';
@@ -8,6 +9,12 @@ infinity.register()
 
 export const AIChatbot = ({ isMinimized, onToggleMinimize, isUserLoggedIn }) => {
   const { makeRequest } = useApi();
+=======
+import React, { useState } from "react"
+import { Send, Bot, User, Minimize2 } from "lucide-react"
+
+export const AIChatbot = ({ isMinimized, onToggleMinimize }) => {
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
   const [messages, setMessages] = useState([
     {
       id: "1",
@@ -17,6 +24,7 @@ export const AIChatbot = ({ isMinimized, onToggleMinimize, isUserLoggedIn }) => 
       timestamp: new Date()
     }
   ])
+<<<<<<< HEAD
 
   const [selectedTask, setSelectedTask] = useState("")
   const [userText, setUserText] = useState("")
@@ -39,11 +47,22 @@ export const AIChatbot = ({ isMinimized, onToggleMinimize, isUserLoggedIn }) => 
     const userMessage = {
       id: Date.now().toString(),
       content: fullMessage,
+=======
+  const [inputMessage, setInputMessage] = useState("")
+
+  const handleSendMessage = () => {
+    if (!inputMessage.trim()) return
+
+    const userMessage = {
+      id: Date.now().toString(),
+      content: inputMessage,
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
       isUser: true,
       timestamp: new Date()
     }
 
     setMessages(prev => [...prev, userMessage])
+<<<<<<< HEAD
     setUserText("")
     setSelectedTask("")
     setShowPopover(false)
@@ -143,6 +162,41 @@ export const AIChatbot = ({ isMinimized, onToggleMinimize, isUserLoggedIn }) => 
   };
 
 
+=======
+    setInputMessage("")
+
+    // Simulate AI response
+    setTimeout(() => {
+      const aiResponse = {
+        id: (Date.now() + 1).toString(),
+        content: getAIResponse(inputMessage),
+        isUser: false,
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, aiResponse])
+    }, 1000)
+  }
+
+  const getAIResponse = input => {
+    const lowerInput = input.toLowerCase()
+
+    if (lowerInput.includes("write") || lowerInput.includes("compose")) {
+      return "I'd be happy to help you write an email! Please tell me:\n\n1. Who is the recipient?\n2. What's the purpose of the email?\n3. What tone would you like (formal, casual, friendly)?\n\nI'll draft something for you to review and edit."
+    } else if (lowerInput.includes("reply") || lowerInput.includes("respond")) {
+      return "I can help you craft a thoughtful reply! Share the email you're responding to or tell me the key points you want to address, and I'll suggest a response."
+    } else if (lowerInput.includes("improve") || lowerInput.includes("edit")) {
+      return "I'll help you polish your email! Paste your draft and I'll suggest improvements for clarity, tone, and professionalism."
+    } else if (
+      lowerInput.includes("meeting") ||
+      lowerInput.includes("schedule")
+    ) {
+      return "I can help you write a meeting request email. I'll need:\n\n• Meeting purpose\n• Preferred dates/times\n• Duration\n• Attendees\n• Meeting location (in-person/virtual)\n\nShall we start with the meeting purpose?"
+    } else {
+      return "I understand you need help with email-related tasks. I can:\n\n✉️ Write new emails\n📝 Improve existing drafts\n↩️ Suggest replies\n📅 Schedule meetings\n🎯 Adjust tone and style\n\nWhat would you like to work on?"
+    }
+  }
+
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
   if (isMinimized) {
     return (
       <div className="fixed bottom-4 right-4 z-50">
@@ -157,6 +211,7 @@ export const AIChatbot = ({ isMinimized, onToggleMinimize, isUserLoggedIn }) => 
   }
 
   return (
+<<<<<<< HEAD
     <div>
       <ToastContainer />
       <div className="w-120 bg-light-background dark:bg-dark-background border-l border-accent/20 flex flex-col h-full ">
@@ -358,5 +413,72 @@ export const AIChatbot = ({ isMinimized, onToggleMinimize, isUserLoggedIn }) => 
       )}
     </div>
 
+=======
+    <div className="w-80 bg-light-background dark:bg-dark-background border-l border-accent/20 flex flex-col h-full">
+      <div className="p-4 border-b border-accent/20 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Bot className="text-primary" size={20} />
+          <h3 className="font-semibold text-light-text dark:text-dark-text">AI Assistant</h3>
+        </div>
+        <button
+          onClick={onToggleMinimize}
+          className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+        >
+          <Minimize2 size={16} />
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map(message => (
+          <div
+            key={message.id}
+            className={`flex gap-3 ${message.isUser ? "justify-end" : "justify-start"
+              }`}
+          >
+            {!message.isUser && (
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Bot size={16} className="text-blue-600" />
+              </div>
+            )}
+
+            <div
+              className={`max-w-[250px] rounded-lg px-3 py-2 ${message.isUser
+                  ? "bg-primary text-light-text"
+                  : "bg-gray-100 dark:bg-accent/10 dark:text-dark-text"
+                }`}
+            >
+              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            </div>
+
+            {message.isUser && (
+              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                <User size={16} className="text-gray-600" />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="p-4 border-t border-accent/70">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={inputMessage}
+            onChange={e => setInputMessage(e.target.value)}
+            onKeyPress={e => e.key === "Enter" && handleSendMessage()}
+            placeholder="Ask me anything about emails..."
+            className="flex-1 px-3 py-2 border border-accent/20 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm focus:outline-none text-light-text dark:text-dark-text"
+          />
+          <button
+            onClick={handleSendMessage}
+            disabled={!inputMessage.trim()}
+            className="p-2 bg-primary text-white rounded-lg hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          >
+            <Send size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
   )
 }

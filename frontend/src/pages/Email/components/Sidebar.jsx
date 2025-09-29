@@ -1,25 +1,40 @@
 import React from "react"
+<<<<<<< HEAD
 import { Inbox, Send, Edit3, Star, Archive, Trash2, MailWarning, LogOut } from "lucide-react"
 
 export const Sidebar = ({ activeView, onViewChange, unreadCount, isUserLoggedIn, emailLogin, signOut }) => {
+=======
+import { Inbox, Send, Edit3, Star, Archive, Trash2 } from "lucide-react"
+
+export const Sidebar = ({ activeView, onViewChange, unreadCount }) => {
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
   const menuItems = [
     { id: "inbox", label: "Inbox", icon: Inbox, count: unreadCount },
     { id: "sent", label: "Sent", icon: Send },
     { id: "drafts", label: "Drafts", icon: Edit3 },
     { id: "starred", label: "Starred", icon: Star },
+<<<<<<< HEAD
     { id: "spam", label: "Spam", icon: MailWarning },
+=======
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
     { id: "archive", label: "Archive", icon: Archive },
     { id: "trash", label: "Trash", icon: Trash2 }
   ]
 
   return (
     <div className="w-64 bg-light-background dark:bg-dark-background border-r border-accent/50 flex flex-col">
+<<<<<<< HEAD
       {/* Header */}
+=======
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
       <div className="p-6 border-b border-accent/30">
         <h1 className="text-2xl font-bold text-light-text dark:text-dark-text">Mail</h1>
       </div>
 
+<<<<<<< HEAD
       {/* Compose button */}
+=======
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
       <div className="p-4">
         <button
           onClick={() => onViewChange("compose")}
@@ -30,18 +45,30 @@ export const Sidebar = ({ activeView, onViewChange, unreadCount, isUserLoggedIn,
         </button>
       </div>
 
+<<<<<<< HEAD
       {/* Menu items */}
+=======
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
       <nav className="flex-1 px-4">
         {menuItems.map(item => (
           <button
             key={item.id}
             onClick={() => onViewChange(item.id)}
             className={`w-full flex items-center gap-3 px-3 py-2 text-left duration-200
+<<<<<<< HEAD
               rounded-xl transition-colors text-light-dark dark:text-dark-text mb-2
               ${activeView === item.id
                 ? "bg-secondary/10 border-l-2 border-primary"
                 : "text-light-dark dark:text-dark-text hover:bg-accent/10"
               }`}
+=======
+               rounded-xl transition-colors text-light-dark dark:text-dark-text mb-2
+              ${
+              activeView === item.id
+                ? "bg-secondary/10 border-l-2 border-primary"
+                : "text-light-dark dark:text-dark-text hover:bg-accent/10"
+            }`}
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
           >
             <item.icon size={20} />
             <span className="flex-1">{item.label}</span>
@@ -53,6 +80,7 @@ export const Sidebar = ({ activeView, onViewChange, unreadCount, isUserLoggedIn,
           </button>
         ))}
       </nav>
+<<<<<<< HEAD
 
       {/* Sign Out at bottom */}
       <div className="p-4 border-t border-accent/30">
@@ -71,6 +99,8 @@ export const Sidebar = ({ activeView, onViewChange, unreadCount, isUserLoggedIn,
         </button>)}
 
       </div>
+=======
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
     </div>
   )
 }

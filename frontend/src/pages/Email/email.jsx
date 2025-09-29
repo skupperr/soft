@@ -10,19 +10,26 @@ function Email() {
     const {
         emails,
         sentEmails,
+<<<<<<< HEAD
         spamEmails,
         selectedEmail,
         isUserLoggedIn,
         isLoading,
+=======
+        selectedEmail,
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
         setSelectedEmail,
         markAsRead,
         toggleStar,
         sendEmail,
         saveDraft,
+<<<<<<< HEAD
         setIsUserLoggedIn,
         emailLogin,
         setIsLoading,
         signOut
+=======
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
     } = useEmails();
 
     const [activeView, setActiveView] = useState('inbox');
@@ -72,8 +79,11 @@ function Email() {
         switch (activeView) {
             case 'sent':
                 return sentEmails;
+<<<<<<< HEAD
             case 'spam':
                 return spamEmails;
+=======
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
             case 'starred':
                 return emails.filter(email => email.isStarred);
             default:
@@ -84,11 +94,16 @@ function Email() {
     const displayEmails = getDisplayEmails();
 
     return (
+<<<<<<< HEAD
         <div className="h-[calc(100vh-4rem)] bg-light-background dark:bg-dark-background flex overflow-hidden">
+=======
+        <div className="h-[calc(100vh-4rem)] bg-light-background dark:bg-dark-background flex">
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
             <Sidebar
                 activeView={activeView}
                 onViewChange={handleViewChange}
                 unreadCount={unreadCount}
+<<<<<<< HEAD
                 isUserLoggedIn={isUserLoggedIn}
                 emailLogin={emailLogin}
                 signOut={signOut}
@@ -96,6 +111,12 @@ function Email() {
 
             <div className="flex-1 flex">
                 <div className="flex-1 flex flex-col min-h-0">
+=======
+            />
+
+            <div className="flex-1 flex">
+                <div className="flex-1 flex flex-col">
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
                     {/* Header with tabs for inbox view */}
                     {activeView === 'inbox' && (
                         <div className="bg-light-background dark:bg-dark-background border-b border-accent/20 px-6 py-4">
@@ -127,23 +148,35 @@ function Email() {
 
                     {/* Other view headers */}
                     {activeView !== 'inbox' && (
+<<<<<<< HEAD
                         <div className="bg-light-background dark:bg-dark-background border-b border-accent/20 px-6 py-4">
                             <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-text capitalize">
+=======
+                        <div className="bg-light-background dark:bg-dark-background border-b border-gray-200 px-6 py-4">
+                            <h2 className="text-xl font-semibold text-gray-900 capitalize">
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
                                 {activeView === 'sent' ? 'Sent Mail' : activeView}
                             </h2>
                         </div>
                     )}
 
+<<<<<<< HEAD
                     <div className="flex-1 flex min-h-0">
                         {/* Email List */}
                         {/* Email List */}
                         <div className="w-80 bg-light-background dark:bg-dark-background border-r border-accent/50 flex flex-col min-h-0 overflow-hidden">
+=======
+                    <div className="flex-1 flex">
+                        {/* Email List */}
+                        <div className="w-80 bg-light-background dark:bg-dark-background border-r border-accent/50 flex flex-col">
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
                             <EmailList
                                 emails={displayEmails}
                                 selectedEmail={selectedEmail}
                                 onSelectEmail={handleSelectEmail}
                                 onToggleStar={toggleStar}
                                 showImportantOnly={activeView === 'inbox' && activeTab === 'important'}
+<<<<<<< HEAD
                                 isLoading={isLoading}
                             />
                         </div>
@@ -158,6 +191,17 @@ function Email() {
                                 onCompose={handleCompose}
                             />
                         </div>
+=======
+                            />
+                        </div>
+
+                        {/* Email View */}
+                        <EmailView
+                            email={selectedEmail}
+                            onToggleStar={toggleStar}
+                            onCompose={handleCompose}
+                        />
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
                     </div>
                 </div>
 
@@ -165,7 +209,10 @@ function Email() {
                 <AIChatbot
                     isMinimized={isAIMinimized}
                     onToggleMinimize={() => setIsAIMinimized(!isAIMinimized)}
+<<<<<<< HEAD
                     isUserLoggedIn={isUserLoggedIn}
+=======
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
                 />
             </div>
 

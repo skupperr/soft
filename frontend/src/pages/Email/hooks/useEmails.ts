@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Email, Draft } from '../types/Email';
 import { mockEmails, mockSentEmails } from '../data/mockEmails';
+<<<<<<< HEAD
 import { useApi } from '../../../utils/api';
 
 export const useEmails = () => {
@@ -92,18 +93,43 @@ export const useEmails = () => {
 
   const markAsRead = (emailId: string) => {
     setEmails(prev => prev.map(email =>
+=======
+
+export const useEmails = () => {
+  const [emails, setEmails] = useState<Email[]>([]);
+  const [sentEmails, setSentEmails] = useState<Email[]>([]);
+  const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
+
+  useEffect(() => {
+    // Simulate loading emails
+    setEmails(mockEmails);
+    setSentEmails(mockSentEmails);
+  }, []);
+
+  const markAsRead = (emailId: string) => {
+    setEmails(prev => prev.map(email => 
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
       email.id === emailId ? { ...email, isRead: true } : email
     ));
   };
 
   const toggleStar = (emailId: string) => {
+<<<<<<< HEAD
     setEmails(prev => prev.map(email =>
+=======
+    setEmails(prev => prev.map(email => 
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
       email.id === emailId ? { ...email, isStarred: !email.isStarred } : email
     ));
   };
 
   const toggleImportant = (emailId: string) => {
+<<<<<<< HEAD
     setEmails(prev => prev.map(email =>
+=======
+    setEmails(prev => prev.map(email => 
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
       email.id === emailId ? { ...email, isImportant: !email.isImportant } : email
     ));
   };
@@ -125,7 +151,11 @@ export const useEmails = () => {
       to: emailData.to,
       subject: emailData.subject,
       body: emailData.body,
+<<<<<<< HEAD
       timestamp: "",
+=======
+      timestamp: new Date(),
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
       isRead: true,
       isImportant: false,
       isStarred: false,
@@ -136,20 +166,28 @@ export const useEmails = () => {
   return {
     emails,
     sentEmails,
+<<<<<<< HEAD
     spamEmails,
     drafts,
     selectedEmail,
     isUserLoggedIn,
     isLoading,
+=======
+    drafts,
+    selectedEmail,
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
     setSelectedEmail,
     markAsRead,
     toggleStar,
     toggleImportant,
     saveDraft,
     sendEmail,
+<<<<<<< HEAD
     setIsUserLoggedIn,
     emailLogin,
     setIsLoading,
     signOut
+=======
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
   };
 };

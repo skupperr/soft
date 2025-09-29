@@ -1,5 +1,8 @@
 import React from "react"
+<<<<<<< HEAD
 import { useEffect } from "react";
+=======
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
 import {
   Reply,
   ReplyAll,
@@ -9,6 +12,7 @@ import {
   Star,
   StarOff
 } from "lucide-react"
+<<<<<<< HEAD
 import { useApi } from '../../../utils/api';
 
 
@@ -32,6 +36,10 @@ export const EmailView = ({ email, onToggleStar }) => {
     }
   }, [email?.id]);
 
+=======
+
+export const EmailView = ({ email, onToggleStar, onCompose }) => {
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
   if (!email) {
     return (
       <div className="flex-1 flex items-center justify-center bg-light-background dark:bg-dark-background">
@@ -46,8 +54,12 @@ export const EmailView = ({ email, onToggleStar }) => {
   }
 
   const formatFullDate = date => {
+<<<<<<< HEAD
     const formatDate = new Date(date);
     return formatDate.toLocaleDateString("en-US", {
+=======
+    return date.toLocaleDateString("en-US", {
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
       weekday: "long",
       year: "numeric",
       month: "long",
@@ -59,7 +71,11 @@ export const EmailView = ({ email, onToggleStar }) => {
   }
 
   return (
+<<<<<<< HEAD
     <div className="flex-1 flex flex-col bg-light-background dark:bg-dark-background min-w-0 overflow-hidden">
+=======
+    <div className="flex-1 flex flex-col bg-light-background dark:bg-dark-background">
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
       <div className="border-b border-primary/50 p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
@@ -97,7 +113,11 @@ export const EmailView = ({ email, onToggleStar }) => {
           </div>
         </div>
 
+<<<<<<< HEAD
         {/* <div className="flex gap-2">
+=======
+        <div className="flex gap-2">
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
           <button
             onClick={() => onCompose("reply", email)}
             className="px-4 py-2 bg-primary text-light-text rounded-lg hover:bg-primary/80 cursor-pointer transition-colors duration-200 flex items-center gap-2"
@@ -119,6 +139,7 @@ export const EmailView = ({ email, onToggleStar }) => {
             <Forward size={16} />
             Forward
           </button>
+<<<<<<< HEAD
         </div> */}
       </div>
 
@@ -129,6 +150,15 @@ export const EmailView = ({ email, onToggleStar }) => {
               key={index}
               className="mb-4 text-gray-700 dark:text-dark-text leading-relaxed"
             >
+=======
+        </div>
+      </div>
+
+      <div className="flex-1 p-6 overflow-y-auto">
+        <div className="prose max-w-none">
+          {email.body.split("\n").map((paragraph, index) => (
+            <p key={index} className="mb-4 text-gray-700 dark:text-dark-text leading-relaxed">
+>>>>>>> 85e3ea269136a87f255f4669a022f33396865816
               {paragraph}
             </p>
           ))}
