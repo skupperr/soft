@@ -160,7 +160,7 @@ function RoutineDashboard() {
 
 
     return (
-        <div className="flex-grow p-6 lg:p-8 bg-light-background dark:bg-dark-background h-fit">
+        <div className="flex-grow p-6 lg:p-8 bg-light-background dark:bg-dark-background h-screen">
             <div className="max-w-7xl mx-auto">
                 <div className="bg-light-background dark:bg-dark-background p-6 rounded-lg shadow-lg mb-6 border-1 border-accent/50">
                     <div className="flex justify-between items-center">
@@ -394,7 +394,7 @@ function RoutineDashboard() {
                                             <p className="text-gray-500 dark:text-dark-text/60">No routine right now</p>
                                         )}
                                         {/* Time left in the day */}
-                                        <p className="mt-2 text-gray-600 dark:text-dark-text/60">
+                                        <p className="mt-2 text-green-600 dark:text-green-text/60">
                                             ⏳ Time left today:{" "}
                                             <span className="font-medium">{hoursLeft}h {minsLeft}m</span>
                                         </p>

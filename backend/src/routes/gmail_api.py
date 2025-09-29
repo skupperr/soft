@@ -52,33 +52,41 @@ USER_TOKENS = {}
 
 @router.get("/auth/google/callback")
 def google_callback(request: Request):
+    try:
+        user_details = authenticate_and_get_user_details(request)
 
-    user_details = authenticate_and_get_user_details(request)
-    user_id = user_details.get("user_id")
-    
-    code = request.query_params.get("code")
-    if not code:
-        return JSONResponse({"error": "No code provided"}, status_code=400)
+        user_id = user_details.get("user_id") if user_details else None
+        if not user_id:
+            return JSONResponse({"error": "No user_id found"}, status_code=400)
 
-    token_data = {
-        "code": code,
-        "client_id": GOOGLE_CLIENT_ID,
-        "client_secret": GOOGLE_CLIENT_SECRET,
-        "redirect_uri": REDIRECT_URI,
-        "grant_type": "authorization_code",
-    }
-    r = requests.post(TOKEN_URI, data=token_data)
-    tokens = r.json()
+        code = request.query_params.get("code")
+        if not code:
+            return JSONResponse({"error": "No code provided"}, status_code=400)
 
-    access_token = tokens.get("access_token")
-    if not access_token:
-        return JSONResponse({"error": tokens}, status_code=400)
+        token_data = {
+            "code": code,
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "redirect_uri": REDIRECT_URI,
+            "grant_type": "authorization_code",
+        }
+        r = requests.post(TOKEN_URI, data=token_data)
+        print("Token response:", r.text)
 
-    # Save tokens for this user (you’d usually identify by user_id/session_id)
-    USER_TOKENS[user_id] = tokens
+        tokens = r.json()
+        access_token = tokens.get("access_token")
+        if not access_token:
+            return JSONResponse({"error": tokens}, status_code=400)
 
-    # Redirect back to frontend (e.g. dashboard page)
-    return RedirectResponse(url="http://localhost:5173/email")
+        USER_TOKENS[user_id] = tokens
+
+        return RedirectResponse(url="http://localhost:5173/email")
+
+    except Exception as e:
+        import traceback
+        print("Error in callback:", traceback.format_exc())
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 
 
 @router.get("/auth/status")
