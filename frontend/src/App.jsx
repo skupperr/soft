@@ -26,6 +26,7 @@ import CareerDashboardLayout from './pages/careerPath/CareerDashboardLayout'
 import LearningPathLayout from './pages/careerPath/LearningPathLayout'
 import PathDetailsLayout from './pages/careerPath/PathDetailsLayout'
 import AiHelp from './pages/careerPath/AiHelp'
+import CareerSurvey from './pages/careerPath/CareerSurvey'
 
 
 function ProtectedMealPlan() {
@@ -83,6 +84,7 @@ function App() {
 							</Route>
 						</Route>
 					</Route>
+					<Route path="/career-survey" element={<CareerSurvey />} />
 
 				</Route>
 			</Routes>

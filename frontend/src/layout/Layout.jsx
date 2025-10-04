@@ -51,6 +51,7 @@ export function Layout() {
                             <Link to="/manage-day">Manage Day</Link>
                             <Link to="/financial-dashboard">Finance</Link>
                             <Link to="/career-path">Career</Link>
+                            <Link to="/career-survey">Career Survey</Link>
                             <Link to="/email">Email</Link>
 
                             {/* User + Theme Toggle in Menu */}
