@@ -316,7 +316,7 @@ function FinancialDashboard() {
 
 
     return (
-        <div className="max-w-7xl mx-auto mt-5 h-auto">
+        <div className="max-w-7xl mx-auto mt-5 h-auto pb-8">
             <header className="flex justify-between items-center mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-light-text dark:text-dark-text">Dashboard</h1>

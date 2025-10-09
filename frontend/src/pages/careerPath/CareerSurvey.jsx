@@ -514,7 +514,7 @@ function CareerSurvey() {
                                                     return next;
                                                 })
                                             }
-                                            className="w-full px-4 py-3 border border-accent text-dark-text rounded-lg focus:border-green-500 focus:outline-none"
+                                            className="w-full px-4 py-3 border border-accent text-light-text dark:text-dark-text rounded-lg focus:border-green-500 focus:outline-none"
                                         />
                                     )}
 

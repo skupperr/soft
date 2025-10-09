@@ -707,7 +707,7 @@ function RoutineEdit() {
 
 
     return (
-        <div className="flex-grow mx-auto px-6 py-8 bg-light-background dark:bg-dark-background pl-10 pr-10 h-screen">
+        <div className="flex-grow mx-auto px-6 py-8 bg-light-background dark:bg-dark-background pl-10 pr-10 h-[calc(100vh-4rem)]">
             <ToastContainer />
             <div className="flex flex-col lg:flex-row gap-8">
                 <form
@@ -904,7 +904,7 @@ function RoutineEdit() {
                         </h2>
                         <div className="flex items-center space-x-4">
                             <div className="flex items-center space-x-2">
-                                <button
+                                {/* <button
                                     className="flex items-center bg-accent text-white px-4 py-2 rounded-md hover:bg-accent/80 "
                                 >
                                     <FaSave className="mr-2 text-lg" />
@@ -917,7 +917,7 @@ function RoutineEdit() {
                                 >
                                     <RiRobot2Fill className="mr-2 text-lg" />
                                     AI Help
-                                </button>
+                                </button> */}
                             </div>
                         </div>
                     </div>
@@ -963,7 +963,7 @@ function RoutineEdit() {
                                         .map((block, idx) => (
                                             <div
                                                 key={idx}
-                                                className="absolute left-2 right-2 rounded-md text-xs text-white p-1"
+                                                className="absolute left-2 right-2 rounded-md text-xs text-white p-1 cursor-pointer"
                                                 style={{
                                                     top: `${block.top}%`,
                                                     height: `${block.height}%`,
