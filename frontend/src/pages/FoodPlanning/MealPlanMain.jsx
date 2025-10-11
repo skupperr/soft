@@ -33,7 +33,6 @@ function MealPlanMain() {
             const res = await makeRequest("get-all-meal");
             if (res.status === "success") {
                 set_Meal_Data(res)
-                console.log(res.data);
             } else {
                 setError("Failed to load meals.");
             }

@@ -15,6 +15,7 @@ function RoutineDashboard() {
     const [showForm, setShowForm] = useState(false);
     const [time, setTime] = useState(new Date());
     const [isOpen, setIsOpen] = useState(false);
+    const [freeTimeSuggestions, setFreeTimeSuggestions] = useState([])
 
 
     const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -139,7 +140,37 @@ function RoutineDashboard() {
             }
         };
 
+
+        const getFreeTimeSuggestion = async () => {
+            try {
+                const res = await makeRequest("free-time-suggestion", { method: "GET" });
+
+                if (res.status === "success") {
+                    let suggestionData;
+
+                    // First, get the string inside `res.suggestion`
+                    if (typeof res.suggestion === "string") {
+                        suggestionData = JSON.parse(res.suggestion);
+                    } else if (res.suggestion?.suggestions) {
+                        // Already parsed
+                        suggestionData = res.suggestion;
+                    } else {
+                        // Sometimes res.suggestion is {suggestion: 'json string'}
+                        suggestionData = JSON.parse(res.suggestion.suggestion);
+                    }
+
+                    setFreeTimeSuggestions(suggestionData.suggestions || []);
+
+                } else {
+                    console.log("No suggestions found");
+                }
+            } catch (err) {
+                console.error("Error fetching routines:", err);
+            }
+        };
+
         fetchRoutines();
+        getFreeTimeSuggestion();
     }, []);
 
     // Current routine
@@ -187,7 +218,6 @@ function RoutineDashboard() {
         try {
             // Optimistic UI update
             setCompleted(prev => ({ ...prev, [routineId]: !prev[routineId] }));
-            console.log("Toggling routine:", routineId);
 
             // Make POST request with routine_id in body
             const res = await makeRequest("routines/toggle", {
@@ -210,7 +240,6 @@ function RoutineDashboard() {
         try {
             const res = await makeRequest("get_today_progress", { method: "GET" }); // routines
             const taskRes = tasks; // from local state
-            console.log("Today's progress data:", res, taskRes);
 
 
             // const totalRoutinesAndTasks = res.total_routines + taskRes.length;
@@ -535,39 +564,29 @@ function RoutineDashboard() {
                                 <span>Free Time Suggestions</span>
                             </h3>
                             <div className="space-y-4 mt-4">
-                                <div className="bg-white dark:bg-dark-background  border-1 border-primary p-4 rounded-lg">
-                                    <div className="flex items-start space-x-3">
-                                        <svg className="w-6 h-6 text-gray-800 dark:text-dark-text" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.03v13m0-13c-2.819-.831-4.715-1.076-8.029-1.023A.99.99 0 0 0 3 6v11c0 .563.466 1.014 1.03 1.007 3.122-.043 5.018.212 7.97 1.023m0-13c2.819-.831 4.715-1.076 8.029-1.023A.99.99 0 0 1 21 6v11c0 .563-.466 1.014-1.03 1.007-3.122-.043-5.018.212-7.97 1.023" />
-                                        </svg>
+                                {Array.isArray(freeTimeSuggestions) && freeTimeSuggestions.length > 0 ? (
+                                    freeTimeSuggestions.map((a, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="bg-white dark:bg-dark-background p-4 border-1 border-primary rounded-lg"
+                                        >
+                                            <div className="flex items-start space-x-3">
+                                                <span className="text-2xl">{a.react_icon}</span>
 
-
-                                        <div>
-                                            <p className="font-medium text-gray-800 dark:text-dark-text">
-                                                Read for 15 minutes
-                                            </p>
-                                            <p className="text-sm text-gray-500 dark:text-dark-text/60">
-                                                Boost your knowledge and relax your mind
-                                            </p>
+                                                <div>
+                                                    <p className="font-medium text-gray-800 dark:text-dark-text">{a.title}</p>
+                                                    <p className="text-sm text-gray-500 dark:text-dark-text/60">
+                                                        {a.description}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white dark:bg-dark-background p-4 border-1 border-primary rounded-lg">
-                                    <div className="flex items-start space-x-3">
-                                        <svg className="w-6 h-6 text-gray-800 dark:text-dark-text" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 18c0 1.1046-.89543 2-2 2s-2-.8954-2-2 .89543-2 2-2 2 .8954 2 2Zm0 0V6.33333L18 4v11.6667M8 10.3333 18 8m0 8c0 1.1046-.8954 2-2 2s-2-.8954-2-2 .8954-2 2-2 2 .8954 2 2Z" />
-                                        </svg>
-
-                                        <div>
-                                            <p className="font-medium text-gray-800 dark:text-dark-text">Listen to music</p>
-                                            <p className="text-sm text-gray-500 dark:text-dark-text/60">
-                                                Energize yourself with your favorite tunes
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                    ))
+                                ) : (
+                                    <p className="text-gray-500 text-sm">No suggestions available.</p>
+                                )}
                             </div>
+
                         </div>
                     </div>
                 </div>

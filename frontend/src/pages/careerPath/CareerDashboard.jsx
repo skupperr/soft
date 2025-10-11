@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from 'react';
 import { useApi } from "../../utils/api";
-
+import { RiVideoAiFill } from "react-icons/ri";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { BsStars } from "react-icons/bs";
 
@@ -12,6 +12,15 @@ function CareerDashboard() {
     const [levels, setLevels] = useState([]); // ✅ start as empty array
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [skillSuggestion, setSkillSuggestion] = useState([]);
+
+    const colorMap = {
+        Yellow: "bg-yellow-50 border-yellow-400 text-yellow-800",
+        Blue: "bg-blue-50 border-blue-400 text-blue-800",
+        Red: "bg-red-50 border-red-400 text-red-800",
+        Green: "bg-green-50 border-green-400 text-green-800",
+        Purple: "bg-purple-50 border-purple-400 text-purple-800",
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,7 +48,38 @@ function CareerDashboard() {
                 setLoading(false);
             }
         };
+
+        const getSkillSuggestion = async () => {
+            try {
+                const res = await makeRequest("skill-suggestion", { method: "GET" });
+
+                if (res.status === "success") {
+                    let suggestionData;
+
+                    // First, get the string inside `res.suggestion`
+                    if (typeof res.suggestion === "string") {
+                        suggestionData = JSON.parse(res.suggestion);
+                    } else if (res.suggestion?.suggestions) {
+                        // Already parsed
+                        suggestionData = res.suggestion;
+                    } else {
+                        // Sometimes res.suggestion is {suggestion: 'json string'}
+                        suggestionData = JSON.parse(res.suggestion.suggestion);
+                    }
+
+                    setSkillSuggestion(suggestionData.suggestions || []);
+                    console.log("Fetched suggestions:", suggestionData);
+
+                } else {
+                    console.log("No suggestions found");
+                }
+            } catch (err) {
+                console.error("Error fetching routines:", err);
+            }
+        };
+
         fetchData();
+        getSkillSuggestion();
     }, []);
 
 
@@ -204,51 +244,66 @@ function CareerDashboard() {
                     <div className="bg-white dark:bg-dark-background border-1 border-accent p-6 rounded-xl shadow-lg">
                         <h2 className="text-xl font-bold text-gray-800 dark:text-dark-text mb-4">Skills You Can Learn This Week</h2>
                         <div className="space-y-4">
-                            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
-                                <div className="flex">
-                                    <div className="mr-3">
-                                        <span className="material-icons text-yellow-500">lightbulb</span>
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-yellow-800">Reduce Dining Out</p>
-                                        <p className="text-sm text-yellow-700 mt-1">You spent 40% more on dining this month. Try
-                                            cooking at home to save $200.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
-                                <div className="flex">
-                                    <div className="mr-3">
-                                        <span className="material-icons text-green-500">trending_up</span>
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-green-800">Increase Savings</p>
-                                        <p className="text-sm text-green-700 mt-1">Based on your income, you could save an
-                                            additional $300 monthly.</p>
-                                    </div>
-                                </div>
-                            </div>
+                            {Array.isArray(skillSuggestion) && skillSuggestion.length > 0 ? (
+                                skillSuggestion.map((a, idx) => {
+                                    const colorClass = colorMap[a.color] || "bg-gray-50 border-gray-300 text-gray-800";
+
+                                    return (
+                                        <div
+                                            key={idx}
+                                            className={`border-l-4 p-4 rounded-r-lg ${colorClass}`}
+                                        >
+                                            <div className="flex">
+                                                <div className="mr-3">
+                                                    <span className="text-2xl">{a.react_icon}</span>
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold">{a.title}</p>
+                                                    <p className="text-sm mt-1">{a.description}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <p className="text-gray-500 text-sm">No suggestions available.</p>
+                            )}
                         </div>
                     </div>
                     <div className="bg-white p-6 rounded-xl shadow-lg dark:bg-dark-background border-1 border-accent">
                         <h2 className="text-xl font-bold text-gray-800 dark:text-dark-text mb-4">Recommended Courses</h2>
                         <div className="space-y-4">
-                            <div className="flex items-center space-x-3">
-                                <img alt="Course icon" className="w-10 h-10 rounded-lg bg-blue-100"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2YXF1HdYv9VZoIGnZSC5Qs4IJvSpipXJDsKuqmib8qyYM866hsQyoz027-7tIV74_gqF1Y26E9JhVfXmuP58wJiOKG8OZCQWdAhupvDa99wcgAtnV3n29E9WrFwak2C1VKK9qWiY-Jk8np4cGst_5Lzelvul43PTfMxQrHfrqF7O69ghOYUcfFDf8wFfuVynzdU6Je4510MY7pPWaUDvLioZWjQJ_ao5a8h8GzA7NvbOm7JpmP1WEK0ynFCWyZZaefXJ1x8QVV9k" />
-                                <div>
-                                    <h3 className="font-semibold text-sm text-gray-800 dark:text-dark-text">Advanced React Patterns</h3>
-                                    <p className="text-xs text-gray-500">Udemy • 8 hours</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                                <img alt="Course icon" className="w-10 h-10 rounded-lg bg-green-100"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiyQ-Vy72oaEwplzKU_zd53uWvduAPjgp0Py-bk65aJA-39d5PAENhoFWHK7WAIeEjIu4cNDShXwbLSpJFlLZoVWtuWJC_IMKaGCJl8hEK62TnYMmJOurIaTOlM09mQ7ViqMssLmyYfyK6kh2aIum5N4U4sXRpjCFVQidcIr1X4O2M81_6g_NovwQTSdyiiDTIBW9AxaSCX6GO_e8xZokDZ_lGz8sabOM_f8cFPdaj74PXEBicsMeDfEcl84brJU809TKZ4rGXbN0" />
-                                <div>
-                                    <h3 className="font-semibold text-sm text-gray-800 dark:text-dark-text">Node.js for Finance Apps</h3>
-                                    <p className="text-xs text-gray-500">Coursera • 24 hours</p>
-                                </div>
-                            </div>
+                            {Array.isArray(skillSuggestion) && skillSuggestion.length > 0 ? (
+                                skillSuggestion.map((a, idx) => (
+
+                                    <div key={idx} className="flex items-center space-x-3 mb-3">
+                                        <div className='flex items-center space-x-2'>
+                                            <RiVideoAiFill className='text-white' size={26} />
+                                            <div>
+                                                <h3 className="font-semibold text-sm text-gray-800 dark:text-dark-text">{a.title}</h3>
+                                                <div className='flex space-x-5'>
+                                                    <a href={`http://youtube.com/results?search_query=${a.title}`} target="_blank">
+                                                        <p className="text-xs text-gray-500 cursor-pointer hover:text-primary">YouTube</p>
+                                                    </a>
+                                                    <a href={`https://www.coursera.org/search?query=${a.title}`} target="_blank">
+                                                        <p className="text-xs text-gray-500 cursor-pointer hover:text-primary">Coursera</p>
+                                                    </a>
+                                                    <a href={`https://www.udemy.com/courses/search/?src=ukw&q=${a.title}`} target="_blank">
+                                                        <p className="text-xs text-gray-500 cursor-pointer hover:text-primary">Udemy</p>
+                                                    </a>
+                                                    <a href={`https://www.edx.org/search?q=${a.title}`} target="_blank">
+                                                        <p className="text-xs text-gray-500 cursor-pointer hover:text-primary">edX</p>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-500 text-sm">No suggestions available.</p>
+                            )}
+
+
                         </div>
                     </div>
                 </div>
