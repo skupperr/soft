@@ -40,9 +40,13 @@ function RoutineDashboard() {
     }, []);
 
     // Task stats
-    const totalTasks = tasks.length;
-    const completedTasks = tasks.filter((t) => t.completed).length;
+    // const [tasks, setTasks] = useState([]);
+
+    const completedTasks = (tasks || []).filter(t => t.completed).length;
+    const totalTasks = (tasks || []).length;
     const taskCompletion = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+
 
 
 
@@ -69,12 +73,15 @@ function RoutineDashboard() {
         if (!newTask.trim()) return;
 
         try {
-            const res = await makeRequest("add_task", {
+            await makeRequest("add_task", {
                 method: "POST",
                 body: JSON.stringify({ task_name: newTask }),
             });
-            // Add to local state
-            setTasks((prev) => [...prev, res.task]);
+
+            // After adding, fetch updated list from backend
+            const res = await makeRequest("get_tasks", { method: "GET" });
+            setTasks(res.tasks || []);
+
             setNewTask("");
             setShowForm(false);
         } catch (err) {
