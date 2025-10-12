@@ -92,6 +92,17 @@ textarea{
   field-sizing: content;
 }
 
+.auth-container {
+  margin: 2rem auto;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 80px;
+}
+
 /* :root {
   --color-primary: #5fd068;
   --color-secondary: #4b8673;

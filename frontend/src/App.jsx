@@ -1,6 +1,5 @@
 import ClerkProviderWithRoutes from './auth/ClerkProviderWithRoute'
 import { Layout } from "./layout/Layout"
-import { AuthenticationPage } from "./auth/AuthenticationPage"
 import { Routes, Route, Navigate } from 'react-router-dom'
 import MealPlan from "./pages/FoodPlanning/MealPlane"
 import MealPlanMain from "./pages/FoodPlanning/MealPlanMain"
@@ -27,6 +26,8 @@ import LearningPathLayout from './pages/careerPath/LearningPathLayout'
 import PathDetailsLayout from './pages/careerPath/PathDetailsLayout'
 import AiHelp from './pages/careerPath/AiHelp'
 import CareerSurvey from './pages/careerPath/CareerSurvey'
+import SignInPage from "./auth/SignInPage";
+import SignUpPage from "./auth/SignUpPage";
 
 
 function ProtectedMealPlan() {
@@ -55,8 +56,8 @@ function App() {
 		<ClerkProviderWithRoutes>
 			<Routes>
 				<Route path="/" element={<LandingPage />} />
-				<Route path="/sign-in/*" element={<AuthenticationPage />} />
-				<Route path="/sign-up" element={<AuthenticationPage />} />
+				<Route path="/sign-in/*" element={<SignInPage />} />
+        		<Route path="/sign-up/*" element={<SignUpPage />} />
 				<Route element={<Layout />}>
 					<Route path="/dashboard" element={<Dashboard />} />
 					<Route path="/chat" element={<ChatPage />} />   {/* now safe */}
