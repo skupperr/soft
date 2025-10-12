@@ -229,3 +229,134 @@ async def get_skill_suggestions(cursor, user_id: str, today_user):
         AND generated_date >= %s
     """, (user_id, first_of_month))
     return await cursor.fetchone()
+
+
+# -----------------------------
+#  INSERT NEW PROJECT IDEA
+# -----------------------------
+async def insert_project_idea(cursor, conn, user_id: str, project_data: dict):
+    try:
+        sql = """
+            INSERT INTO project_ideas 
+            (user_id, project_name, sector, short_description, requirements, duration, complexity, why_this_project, tags)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        requirements_json = json.dumps(project_data.get("requirements", []))
+        tags_json = json.dumps(project_data.get("tags", []))
+
+        await cursor.execute(sql, (
+            user_id,
+            project_data.get("project_name"),
+            project_data.get("sector"),
+            project_data.get("short_description"),
+            requirements_json,
+            project_data.get("duration"),
+            str(project_data.get("complexity")),
+            project_data.get("why_this_project"),
+            tags_json
+        ))
+        await conn.commit()
+
+        return {"status": "success", "id": cursor.lastrowid}
+
+    except Exception as e:
+        await conn.rollback()
+        raise HTTPException(status_code=500, detail=f"DB insert error: {str(e)}")
+
+
+# -----------------------------
+#  GET ALL PROJECT IDEAS (SORTED BY TIME)
+# -----------------------------
+async def get_all_project_ideas(cursor, user_id: str):
+    try:
+        sql = """
+            SELECT * FROM project_ideas
+            WHERE user_id = %s
+            ORDER BY created_at DESC
+        """
+        await cursor.execute(sql, (user_id,))
+        rows = await cursor.fetchall()
+
+        projects = []
+        for row in rows:
+            projects.append({
+                "id": row["id"],
+                "user_id": row["user_id"],
+                "project_name": row["project_name"],
+                "sector": row["sector"],
+                "short_description": row["short_description"],
+                "requirements": json.loads(row["requirements"]) if row["requirements"] else [],
+                "duration": row["duration"],
+                "complexity": row["complexity"],
+                "why_this_project": row["why_this_project"],
+                "tags": json.loads(row["tags"]) if row["tags"] else [],
+                "status": row["status"],
+                "created_at": row["created_at"],
+                "started_at": row["started_at"],
+                "completed_at": row["completed_at"]
+            })
+        return projects
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DB fetch error: {str(e)}")
+
+
+# -----------------------------
+#  UPDATE PROJECT STATUS
+# -----------------------------
+async def update_project_status(cursor, conn, user_id: str, project_id: int, new_status: str):
+    try:
+        # Validate status
+        if new_status not in ["not_started", "in_progress", "completed"]:
+            raise HTTPException(status_code=400, detail="Invalid status value")
+
+        timestamp_column = None
+        if new_status == "in_progress":
+            timestamp_column = "started_at"
+        elif new_status == "completed":
+            timestamp_column = "completed_at"
+
+        # Update query
+        if timestamp_column:
+            sql = f"""
+                UPDATE project_ideas
+                SET status = %s, {timestamp_column} = CURRENT_TIMESTAMP
+                WHERE user_id = %s AND id = %s
+            """
+        else:
+            sql = """
+                UPDATE project_ideas
+                SET status = %s
+                WHERE user_id = %s AND id = %s
+            """
+
+        await cursor.execute(sql, (new_status, user_id, project_id))
+        await conn.commit()
+
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+        return {"status": "success", "message": f"Project status updated to {new_status}"}
+
+    except Exception as e:
+        await conn.rollback()
+        raise HTTPException(status_code=500, detail=f"DB update error: {str(e)}")
+
+
+# -----------------------------
+#  DELETE PROJECT
+# -----------------------------
+async def delete_project(cursor, conn, user_id: str, project_id: int):
+    try:
+        sql = "DELETE FROM project_ideas WHERE user_id = %s AND id = %s"
+        await cursor.execute(sql, (user_id, project_id))
+        await conn.commit()
+
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+        return {"status": "success", "message": "Project deleted successfully"}
+
+    except Exception as e:
+        await conn.rollback()
+        raise HTTPException(status_code=500, detail=f"DB delete error: {str(e)}")
