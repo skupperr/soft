@@ -43,6 +43,8 @@ async def storing_career_survey(
             cursor, conn, user_id, survey_data
         )
 
+        await industry_trend_generator(request=request_obj, db_dep=db_dep)
+
         return {"status": "success"}
 
     except Exception as e:
@@ -328,3 +330,22 @@ async def delete_project(project_id: int, request: Request, db_dep=Depends(get_d
     user_id = user_details.get("user_id")
 
     return await career_planning_db.delete_project(cursor, conn, user_id, project_id)
+
+
+@router.get("/get-career-survey-answer")
+async def get_career_survey_answer(request: Request = None, db_dep=Depends(get_db)):
+    try:
+        cursor, conn = db_dep
+        user_details = authenticate_and_get_user_details(request)
+        user_id = user_details.get("user_id")
+
+        record = await career_planning_db.get_users_career_planning_info(
+            cursor, user_id
+        )
+
+        return {"status": "success", "data": record}
+
+    except Exception as e:
+        print(str(e))
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")

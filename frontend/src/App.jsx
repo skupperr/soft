@@ -31,7 +31,7 @@ import SignUpPage from "./auth/SignUpPage";
 
 
 function ProtectedMealPlan() {
-	const isNewUser = false; // fake flag for now
+	const isNewUser = false;
 
 	if (isNewUser) {
 		return <Navigate to="/meal-survey" replace />;
@@ -41,7 +41,7 @@ function ProtectedMealPlan() {
 }
 
 function ProtectedCareerPlan() {
-	const isNewUserCareer = false; // fake flag for now
+	const isNewUserCareer = false;
 
 	if (isNewUserCareer) {
 		return <Navigate to="/career-survey" replace />;

@@ -18,11 +18,10 @@ async def store_users_career_planning_info(cursor, conn, user_id: str, survey_da
     try:
         await cursor.execute("""
             INSERT INTO career_planning (
-                user_id, current_user_location, job_type, preferred_working_country, preferred_industry, preferred_job_roles, career_goal, preferred_career, preferred_field_or_domain, preferred_work_activity, industry_to_work_for, skill_to_develop
-            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                user_id, job_type, preferred_working_country, preferred_industry, preferred_job_roles, career_goal, preferred_career, preferred_field_or_domain, preferred_work_activity, industry_to_work_for, skill_to_develop
+            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (
             user_id,
-            survey_data.get("current_user_location"),
             survey_data.get("job_type"),
             json.dumps(survey_data.get("preferred_working_country")) if survey_data.get("preferred_working_country") else None,
             json.dumps(survey_data.get("preferred_industry")) if survey_data.get("preferred_industry") else None,
@@ -48,7 +47,7 @@ async def store_users_career_planning_info(cursor, conn, user_id: str, survey_da
 async def get_users_career_planning_info(cursor, user_id: str):
     try:
         await cursor.execute("""
-            SELECT user_id, current_user_location, job_type, preferred_working_country, preferred_industry, preferred_job_roles, career_goal, preferred_career, preferred_field_or_domain, preferred_work_activity, industry_to_work_for, skill_to_develop
+            SELECT user_id, job_type, preferred_working_country, preferred_industry, preferred_job_roles, career_goal, preferred_career, preferred_field_or_domain, preferred_work_activity, industry_to_work_for, skill_to_develop
             FROM career_planning WHERE user_id = %s ORDER BY id DESC LIMIT 1
         """, (user_id,))
         
@@ -60,7 +59,6 @@ async def get_users_career_planning_info(cursor, user_id: str):
         # Convert from DB format to JSON/dict
         data = {
             # "user_id": row["user_id"],
-            "current_user_location": row["current_user_location"],
             "job_type": row["job_type"],
             "preferred_working_country": json.loads(row["preferred_working_country"]) if row["preferred_working_country"] else None,
             "preferred_industry": json.loads(row["preferred_industry"]) if row["preferred_industry"] else None,
@@ -163,34 +161,34 @@ async def get_industry_trends_combined(cursor, user_id: str):
     
 
 # ✅ Get user career info (you already have a version of this)
-async def get_users_career_planning_info(cursor, user_id: str):
-    try:
-        await cursor.execute("""
-            SELECT user_id, current_user_location, job_type, preferred_working_country, preferred_industry, 
-                   preferred_job_roles, career_goal, preferred_career, preferred_field_or_domain, 
-                   preferred_work_activity, industry_to_work_for, skill_to_develop
-            FROM career_planning 
-            WHERE user_id = %s 
-            ORDER BY id DESC 
-            LIMIT 1
-        """, (user_id,))
+# async def get_users_career_planning_info(cursor, user_id: str):
+#     try:
+#         await cursor.execute("""
+#             SELECT user_id, current_user_location, job_type, preferred_working_country, preferred_industry, 
+#                    preferred_job_roles, career_goal, preferred_career, preferred_field_or_domain, 
+#                    preferred_work_activity, industry_to_work_for, skill_to_develop
+#             FROM career_planning 
+#             WHERE user_id = %s 
+#             ORDER BY id DESC 
+#             LIMIT 1
+#         """, (user_id,))
         
-        row = await cursor.fetchone()
-        if not row:
-            return None
+#         row = await cursor.fetchone()
+#         if not row:
+#             return None
 
-        return {
-            "job_type": row["job_type"],
-            "preferred_industry": json.loads(row["preferred_industry"]) if row["preferred_industry"] else None,
-            "preferred_job_roles": json.loads(row["preferred_job_roles"]) if row["preferred_job_roles"] else None,
-            "career_goal": json.loads(row["career_goal"]) if row["career_goal"] else None,
-            "preferred_career": json.loads(row["preferred_career"]) if row["preferred_career"] else None,
-            "preferred_field_or_domain": json.loads(row["preferred_field_or_domain"]) if row["preferred_field_or_domain"] else None,
-            "preferred_work_activity": json.loads(row["preferred_work_activity"]) if row["preferred_work_activity"] else None,
-            "industry_to_work_for": json.loads(row["industry_to_work_for"]) if row["industry_to_work_for"] else None,
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database retrieval error: {str(e)}")
+#         return {
+#             "job_type": row["job_type"],
+#             "preferred_industry": json.loads(row["preferred_industry"]) if row["preferred_industry"] else None,
+#             "preferred_job_roles": json.loads(row["preferred_job_roles"]) if row["preferred_job_roles"] else None,
+#             "career_goal": json.loads(row["career_goal"]) if row["career_goal"] else None,
+#             "preferred_career": json.loads(row["preferred_career"]) if row["preferred_career"] else None,
+#             "preferred_field_or_domain": json.loads(row["preferred_field_or_domain"]) if row["preferred_field_or_domain"] else None,
+#             "preferred_work_activity": json.loads(row["preferred_work_activity"]) if row["preferred_work_activity"] else None,
+#             "industry_to_work_for": json.loads(row["industry_to_work_for"]) if row["industry_to_work_for"] else None,
+#         }
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Database retrieval error: {str(e)}")
 
 
 # ✅ Delete all existing suggestions for the user

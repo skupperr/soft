@@ -222,6 +222,247 @@ async def get_meal_plan(cursor, user_id: str):
     await cursor.execute("SELECT * FROM meal_plan WHERE user_id = %s", (user_id,))
     return await cursor.fetchall()
 
+async def get_today_meal(cursor, user_id: str, today: str):
+    """
+    Fetch today's meals (Breakfast, Lunch, Dinner) for the given user.
+    """
+    try:
+        query = """
+            SELECT 
+                ID AS meal_id,
+                meal_name AS food_title,
+                meal_type,
+                meal_day,
+                nutrition AS details,
+                recipe,
+                ingredients_used AS ingredients,
+                img_link AS image,
+                is_checked
+            FROM meal_plan
+            WHERE user_id = %s AND meal_day = %s
+        """
+        await cursor.execute(query, (user_id, today))
+        return await cursor.fetchall()
+    except Exception as e:
+        import traceback
+
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def deduct_ingredient(
+    cursor, conn, user_id: str, ingredient_name: str, deduct_amount: str
+):
+    """
+    ✅ Deducts a given ingredient amount from the user's available groceries.
+
+    Handles unit conversions correctly:
+    - "g" ↔ "kg"
+    - "ml" ↔ "ltr"
+
+    Example: "2 kg Rice" - "500 g" = "1.5 kg"
+
+    Returns:
+    - True if updated
+    - False if ingredient not found
+    """
+    try:
+        query_select = """
+            SELECT available_amount 
+            FROM available_groceries 
+            WHERE user_id = %s AND grocery_name = %s
+        """
+        await cursor.execute(query_select, (user_id, ingredient_name))
+        row = await cursor.fetchone()
+        if not row:
+            return False
+
+        current_amount_str = row["available_amount"]
+
+        # --- Parse amount like "50g" or "1 kg"
+        def parse_amount(amount_str):
+            import re
+
+            match = re.match(r"([\d\.]+)\s*([a-zA-Z]*)", amount_str.strip())
+            if match:
+                value = float(match.group(1))
+                unit = match.group(2).lower()
+                # Normalize gm -> g, l -> ltr
+                if unit in ["gm"]:
+                    unit = "g"
+                if unit in ["l"]:
+                    unit = "ltr"
+                return value, unit
+            raise HTTPException(status_code=400, detail=f"Invalid amount: {amount_str}")
+
+        current_value, current_unit = parse_amount(current_amount_str)
+        deduct_value, deduct_unit = parse_amount(deduct_amount)
+
+        # --- Unit map for base conversions ---
+        unit_map = {
+            "g": ("kg", 0.001),
+            "kg": ("kg", 1),
+            "ml": ("ltr", 0.001),
+            "ltr": ("ltr", 1),
+        }
+
+        if current_unit not in unit_map or deduct_unit not in unit_map:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported unit: {current_unit} or {deduct_unit}",
+            )
+
+        base_current_unit, current_factor = unit_map[current_unit]
+        base_deduct_unit, deduct_factor = unit_map[deduct_unit]
+
+        if base_current_unit != base_deduct_unit:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Incompatible units: {current_unit} vs {deduct_unit}",
+            )
+
+        # --- Convert both to base ---
+        current_value_base = current_value * current_factor
+        deduct_value_base = deduct_value * deduct_factor
+
+        new_value_base = max(current_value_base - deduct_value_base, 0)
+
+        # --- Convert back to display unit ---
+        # Prefer kg/ltr, but if <1, use g/ml
+        if base_current_unit == "kg":
+            if new_value_base >= 1:
+                display_value = round(new_value_base, 2)
+                display_unit = "kg"
+            else:
+                display_value = round(new_value_base * 1000)
+                display_unit = "g"
+        else:  # ltr
+            if new_value_base >= 1:
+                display_value = round(new_value_base, 2)
+                display_unit = "ltr"
+            else:
+                display_value = round(new_value_base * 1000)
+                display_unit = "ml"
+
+        new_amount_str = f"{display_value} {display_unit}"
+
+        print(
+            f"🔽 Deducting {deduct_amount} from {current_amount_str} of {ingredient_name}"
+        )
+        query_update = """
+            UPDATE available_groceries
+            SET available_amount = %s
+            WHERE user_id = %s AND grocery_name = %s
+        """
+        await cursor.execute(query_update, (new_amount_str, user_id, ingredient_name))
+        await conn.commit()
+
+        print(f"✅ {ingredient_name}: {current_amount_str} -> {new_amount_str}")
+        return True
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def add_ingredient(
+    cursor, conn, user_id: str, ingredient_name: str, add_amount: str
+):
+    """
+    Adds a given ingredient amount back to user's available groceries.
+    Handles unit conversions like deduct_ingredient.
+    """
+    try:
+        query_select = """
+            SELECT available_amount 
+            FROM available_groceries 
+            WHERE user_id = %s AND grocery_name = %s
+        """
+        await cursor.execute(query_select, (user_id, ingredient_name))
+        row = await cursor.fetchone()
+        if not row:
+            return False
+
+        current_amount_str = row["available_amount"]
+
+        def parse_amount(amount_str):
+            import re
+
+            match = re.match(r"([\d\.]+)\s*([a-zA-Z]*)", amount_str.strip())
+            if match:
+                value = float(match.group(1))
+                unit = match.group(2).lower()
+                if unit in ["gm"]:
+                    unit = "g"
+                if unit in ["l"]:
+                    unit = "ltr"
+                return value, unit
+            raise HTTPException(status_code=400, detail=f"Invalid amount: {amount_str}")
+
+        current_value, current_unit = parse_amount(current_amount_str)
+        add_value, add_unit = parse_amount(add_amount)
+
+        unit_map = {
+            "g": ("kg", 0.001),
+            "kg": ("kg", 1),
+            "ml": ("ltr", 0.001),
+            "ltr": ("ltr", 1),
+        }
+
+        base_current_unit, current_factor = unit_map[current_unit]
+        base_add_unit, add_factor = unit_map[add_unit]
+
+        if base_current_unit != base_add_unit:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Incompatible units: {current_unit} vs {add_unit}",
+            )
+
+        # ✅ Add instead of subtract
+        new_value_base = current_value * current_factor + add_value * add_factor
+
+        if base_current_unit == "kg":
+            if new_value_base >= 1:
+                display_value = round(new_value_base, 2)
+                display_unit = "kg"
+            else:
+                display_value = round(new_value_base * 1000)
+                display_unit = "g"
+        else:  # ltr
+            if new_value_base >= 1:
+                display_value = round(new_value_base, 2)
+                display_unit = "ltr"
+            else:
+                display_value = round(new_value_base * 1000)
+                display_unit = "ml"
+
+        new_amount_str = f"{display_value} {display_unit}"
+
+        query_update = """
+            UPDATE available_groceries
+            SET available_amount = %s
+            WHERE user_id = %s AND grocery_name = %s
+        """
+        await cursor.execute(query_update, (new_amount_str, user_id, ingredient_name))
+        await conn.commit()
+
+        print(
+            f"✅ {ingredient_name}: {current_amount_str} -> {new_amount_str} (added back)"
+        )
+        return True
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 # ✅ Delete all health alert by user
 async def delete_all_health_alert(cursor, conn, user_id: str):
@@ -443,6 +684,42 @@ async def store_grocery_list(cursor, conn, user_id, list_name, total_price, item
         await conn.rollback()
         print(f"❌ Error storing grocery list: {e}")
         raise e
+
+
+async def record_transaction(cursor, conn, account_ID, description, amount, category_ID, type):
+    """
+    Inserts a new transaction entry for an account.
+    type can be 'DEBIT' or 'CREDIT'
+    """
+    try:
+        await cursor.execute(
+            """
+            INSERT INTO transactions (account_ID, amount, type, description, category_ID, created_at)
+            VALUES (%s, %s, %s, %s, %s, NOW())
+            """,
+            (account_ID, amount, type, description, category_ID)
+        )
+
+        # ✅ Update account balance
+        if type.upper() == "DEBIT":
+            await cursor.execute(
+                "UPDATE accounts SET balance = balance - %s WHERE account_ID = %s",
+                (amount, account_ID)
+            )
+        elif type.upper() == "CREDIT":
+            await cursor.execute(
+                "UPDATE accounts SET balance = balance + %s WHERE account_ID = %s",
+                (amount, account_ID)
+            )
+
+        await conn.commit()
+        print(f"💰 Recorded {type} transaction for account {account_ID} of amount {amount}")
+
+    except Exception as e:
+        await conn.rollback()
+        print(f"❌ Error recording transaction: {e}")
+        raise e
+    
 
 
 async def get_grocery_dashboard_stats(cursor, user_id):
