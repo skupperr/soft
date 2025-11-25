@@ -48,7 +48,7 @@ LifeLens AI is a comprehensive AI-powered life management platform built with a 
 
 
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 🧰 Prerequisites
 
@@ -106,9 +106,7 @@ docker run -d --name redis -p 6379:6379 redis
 docker ps
 ```
 
-## 🛠️ Local Development Setup
-
-## 🔧 Configuration
+## Local Development Setup
 
 ### Environment Variables
 
@@ -159,7 +157,7 @@ LifeLens/
 
 
 
-## 🛠️ Architecture
+## Architecture
 
 ### Microservices Architecture
 ```
@@ -298,7 +296,7 @@ docker-compose restart mysql # Restart MySQL container
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🎖️ Credits
+## Credits
 
 **LifeLens** – Empowering Smarter Living Through AI! 🌍
 
