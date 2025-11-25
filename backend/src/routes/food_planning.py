@@ -664,15 +664,15 @@ async def add_grocery_list(
                 f"🔄 Processing: {raw_name} → {matched_name} | {unit_quantity_number} {unit_unit} × {item_quantity}"
             )
 
-            # await food_planning_db.update_or_insert_available_grocery(
-            #     cursor=cursor,
-            #     conn=conn,
-            #     user_id=user_id,
-            #     grocery_name=matched_name,
-            #     item_quantity=item_quantity,
-            #     unit_quantity_number=unit_quantity_number,
-            #     unit_unit=unit_unit,
-            # )
+            await food_planning_db.update_or_insert_available_grocery(
+                cursor=cursor,
+                conn=conn,
+                user_id=user_id,
+                grocery_name=matched_name,
+                item_quantity=item_quantity,
+                unit_quantity_number=unit_quantity_number,
+                unit_unit=unit_unit,
+            )
 
         return {
             "status": "success",
@@ -776,6 +776,23 @@ async def delete_available_grocery(
         raise HTTPException(status_code=500, detail=f"Error deleting grocery: {str(e)}")
 
 
+# @router.get("/grocery-lists")
+# async def get_grocery_lists(
+#     request_obj: Request, filter: str = "all", db_dep=Depends(get_db)
+# ):
+#     try:
+#         cursor, conn = db_dep
+#         user_details = authenticate_and_get_user_details(request_obj)
+#         user_id = user_details["user_id"]
+#         lists = await food_planning_db.fetch_grocery_lists(
+#             cursor, conn, user_id, filter
+#         )
+#         return lists
+#     except Exception as e:
+#         import traceback
+
+#         print("Error in get_grocery_lists:", traceback.format_exc())
+#         raise HTTPException(status_code=500, detail=str(e))
 @router.get("/grocery-lists")
 async def get_grocery_lists(
     request_obj: Request, filter: str = "all", db_dep=Depends(get_db)
@@ -784,13 +801,10 @@ async def get_grocery_lists(
         cursor, conn = db_dep
         user_details = authenticate_and_get_user_details(request_obj)
         user_id = user_details["user_id"]
-        lists = await food_planning_db.fetch_grocery_lists(
-            cursor, conn, user_id, filter
-        )
-        return lists
+        data = await food_planning_db.fetch_grocery_lists(cursor, conn, user_id, filter)
+        return data
     except Exception as e:
         import traceback
-
         print("Error in get_grocery_lists:", traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 

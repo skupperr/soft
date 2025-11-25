@@ -204,11 +204,11 @@ function CareerDashboard() {
                 <h1 className="text-4xl font-bold">Your Financial Technology Learning Journey</h1>
                 <p className="mt-2 text-lg">Master the skills needed to build sophisticated financial applications and advance
                     your career in fintech.</p>
-                <div className="mt-6 flex space-x-4">
+                {/* <div className="mt-6 flex space-x-4">
                     <div className="bg-gray-400 dark:bg-white/20 px-4 py-2 rounded-lg text-sm">Progress: 65%</div>
                     <div className="bg-gray-400 dark:bg-white/20 px-4 py-2 rounded-lg text-sm">12 Skills Acquired</div>
                     <div className="bg-gray-400 dark:bg-white/20 px-4 py-2 rounded-lg text-sm">8 Projects Completed</div>
-                </div>
+                </div> */}
             </div>
 
             <button>

@@ -5,6 +5,8 @@ import { useApi } from "../../utils/api";
 import { RiRobot3Fill } from "react-icons/ri";
 import { infinity } from 'ldrs'
 import { FaUserCircle } from "react-icons/fa";
+import { IoSend } from "react-icons/io5";
+
 
 
 function AiHelp() {
@@ -44,7 +46,19 @@ function AiHelp() {
     const messagesEndRef = useRef(null); // for auto-scroll
 
     const handleSend = async () => {
-        if (!input.trim()) return;
+        // if (!input.trim()) return;
+        // Check empty
+        const trimmedInput = input.trim();
+        if (!trimmedInput) {
+            alert("Input cannot be empty.");
+            return;
+        }
+
+        // Check length
+        if (trimmedInput.length > 150) {
+            alert("Input cannot exceed 100 characters.");
+            return;
+        }
 
         const newMessages = [...messages, { role: "user", content: input.trim() }];
         setMessages(newMessages);
@@ -271,7 +285,8 @@ function AiHelp() {
                                 onClick={handleSend}
                                 className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white hover:bg-primary/90"
                             >
-                                <span className="material-symbols-outlined">send</span>
+                                <span className="material-symbols-outlined"><IoSend />
+                                </span>
                             </button>
                         </div>
                     </div>

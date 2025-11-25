@@ -33,6 +33,15 @@ async def store_users_career_planning_info(cursor, conn, user_id: str, survey_da
             json.dumps(survey_data.get("industry_to_work_for")) if survey_data.get("industry_to_work_for") else None,
             json.dumps(survey_data.get("skill_to_develop")) if survey_data.get("skill_to_develop") else None,
         ))
+        
+        #Update user table to mark career survey as completed
+        update_sql = """
+            UPDATE user
+            SET career_survey_completed = 1
+            WHERE user_ID = %s
+        """
+        await cursor.execute(update_sql, (user_id,))
+
         await conn.commit()
 
         # await clear_user_cache(user_id, "get_user_food_planning_info")
